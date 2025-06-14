@@ -27,6 +27,9 @@ This is a list of all examples included in `Program.cs`, with a short explanatio
 
 ## 🔹 `==` Operator Examples
 
+The `==` operator compares references by default for reference types and compares values for built-in value types (like `int`). It can be **overridden** in custom classes to support **semantic value equality**.
+
+
 | #    | Name                                                  | Description                                                                 |
 |------|-------------------------------------------------------|-----------------------------------------------------------------------------|
 | 1    | `==` with reference types (not overridden)            | Compares two objects of the same class with identical content → `false` due to reference comparison. |
@@ -39,6 +42,9 @@ This is a list of all examples included in `Program.cs`, with a short explanatio
 
 ## 🔹 `.Equals()` Method Examples
 
+The `.Equals()` method is intended for **semantic content comparison**. For value types, it compares field-by-field. For reference types, you must **override** it to get meaningful value equality.
+
+
 | #    | Name                                                  | Description                                                                 |
 |------|-------------------------------------------------------|-----------------------------------------------------------------------------|
 | 6    | `.Equals()` with reference types (not overridden)     | Default `Equals()` compares references → returns `false` for same content. |
@@ -49,6 +55,9 @@ This is a list of all examples included in `Program.cs`, with a short explanatio
 ---
 
 ## 🔹 `ReferenceEquals()` Identity Checks
+
+`Object.ReferenceEquals()` checks if two variables point to the **exact same object in memory**. It is unaffected by overrides or boxing logic and is useful when you want to ensure **true identity**.
+
 
 | #     | Name                                                 | Description                                                                 |
 |-------|------------------------------------------------------|-----------------------------------------------------------------------------|
