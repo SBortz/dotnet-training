@@ -8,14 +8,7 @@ The code is structured into clear examples, each with an explanation and output.
 
 ## 🎯 Purpose
 
-This training covers:
-
-- ✅ Value vs reference equality
-- ✅ Overriding `==` and `.Equals()`
-- ✅ Boxing and its effects on comparison
-- ✅ Interning with `string`
-- ✅ `ReferenceEquals` for strict identity checking
-- ✅ Best practices for domain-driven design (DDD) value objects
+Even after many many years of acting in the .NET field I was recently in a situation where I wasn´t 100% sure any more about all the details and differences between `==` and `.Equals()`. So I took some time and created this overview to compare them.
 
 ---
 
