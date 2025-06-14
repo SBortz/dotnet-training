@@ -2,7 +2,7 @@
 
 ## 🎯 Purpose
 
-Even after many many years of acting in the .NET field I was recently in a situation where I wasn´t 100% sure about all the details and differences of `==` and `.Equals()` any more. So I took some time and created this overview to compare them and refresh my knowledge.
+Even after many many years of acting in the .NET field I was recently a bit unsure about the details and differences of `==` and `.Equals()` any more. So I took some time and created this overview to compare them and refresh my knowledge.
 
 This project demonstrates how **equality (`==`, `.Equals()`)** and **identity (`ReferenceEquals`)** behave in C#. It covers reference types, value types, structs, operator overloading, boxing, and interning.
 
