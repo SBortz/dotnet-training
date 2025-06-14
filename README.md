@@ -23,6 +23,10 @@ This training covers:
 
 This is a list of all examples included in `Program.cs`, with a short explanation for each.
 
+---
+
+## 🔹 `==` Operator Examples
+
 | #    | Name                                                  | Description                                                                 |
 |------|-------------------------------------------------------|-----------------------------------------------------------------------------|
 | 1    | `==` with reference types (not overridden)            | Compares two objects of the same class with identical content → `false` due to reference comparison. |
@@ -33,6 +37,8 @@ This is a list of all examples included in `Program.cs`, with a short explanatio
 
 ---
 
+## 🔹 `.Equals()` Method Examples
+
 | #    | Name                                                  | Description                                                                 |
 |------|-------------------------------------------------------|-----------------------------------------------------------------------------|
 | 6    | `.Equals()` with reference types (not overridden)     | Default `Equals()` compares references → returns `false` for same content. |
@@ -41,6 +47,8 @@ This is a list of all examples included in `Program.cs`, with a short explanatio
 | 9    | `.Equals()` with custom struct                        | Structs support default field-wise comparison via `Equals()` → returns `true`. |
 
 ---
+
+## 🔹 `ReferenceEquals()` Identity Checks
 
 | #     | Name                                                 | Description                                                                 |
 |-------|------------------------------------------------------|-----------------------------------------------------------------------------|
