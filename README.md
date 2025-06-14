@@ -1,14 +1,10 @@
 # 🔍 C# Equality & Identity Training
 
-This project demonstrates how **equality (`==`, `.Equals()`)** and **identity (`ReferenceEquals`)** behave in C#. It covers reference types, value types, structs, operator overloading, boxing, and interning.
-
-The code is structured into clear examples, each with an explanation and output.
-
----
-
 ## 🎯 Purpose
 
-Even after many many years of acting in the .NET field I was recently in a situation where I wasn´t 100% sure any more about all the details and differences between `==` and `.Equals()`. So I took some time and created this overview to compare them.
+Even after many many years of acting in the .NET field I was recently in a situation where I wasn´t 100% sure about all the details and differences of `==` and `.Equals()` any more. So I took some time and created this overview to compare them and refresh my knowledge.
+
+This project demonstrates how **equality (`==`, `.Equals()`)** and **identity (`ReferenceEquals`)** behave in C#. It covers reference types, value types, structs, operator overloading, boxing, and interning.
 
 ---
 
