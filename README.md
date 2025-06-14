@@ -1,4 +1,4 @@
-# 🔍 C# Equality & Identity Training
+# 🔍 C# Equality Overview
 
 ## 🎯 Purpose
 
