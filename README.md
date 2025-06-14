@@ -21,19 +21,29 @@ This training covers:
 
 # 🧪 List of Examples – Equality & Identity in C#
 
-This is a complete overview of the examples in `Program.cs`.
+This is a list of all examples included in `Program.cs`, with a short explanation for each.
 
-| #   | Name                                             | Description                                                                |
-|-----|--------------------------------------------------|----------------------------------------------------------------------------|
-| 1   | `==` with reference types (not overridden)       | Shows that `==` compares references by default for classes.                |
-| 2   | `==` with built-in value types (`int`)           | Compares actual numeric values — always true for equal numbers.            |
-| 3   | `==` with `string`                               | `string` overrides `==` for value-based content comparison.                |
-| 4   | `==` with custom structs                         | Fails to compile unless operator is overloaded — not defined by default.   |
-| 5   | `.Equals()` with reference types (not overridden)| Default `Equals()` compares references like `==` unless overridden.        |
-| 6   | `.Equals()` with reference types (overridden)    | Shows how to define logical content equality by overriding `Equals()`.     |
-| 7   | `.Equals()` with built-in value types            | Value types like `int` override `.Equals()` for content comparison.        |
-| 8   | `.Equals()` with structs                         | Structs support structural equality out of the box via field-by-field compare. |
-| 9   | `==` operator overloaded (value equality)        | Demonstrates custom `==` logic for semantic comparison of objects.         |
-| 10  | `ReferenceEquals()` with reference types         | Checks if two variables point to the exact same object in memory.          |
-| 11  | `ReferenceEquals()` with boxed `int`             | Boxing creates new objects — even for equal values, identity differs.      |
-| 12  | `ReferenceEquals()` with boxed struct            | Like with `int`, boxing structs results in different references.           |
+| #    | Name                                                  | Description                                                                 |
+|------|-------------------------------------------------------|-----------------------------------------------------------------------------|
+| 1    | `==` with reference types (not overridden)            | Compares two objects of the same class with identical content → `false` due to reference comparison. |
+| 2    | `==` with reference types (overridden for value)      | Uses overloaded `==` in `PersonC` class to compare values semantically.     |
+| 3    | `==` with built-in value types (`int`)                | Compares values directly → returns `true` for equal values.                 |
+| 4    | `==` with `string`                                    | `string` overrides `==` to compare content, not reference.                 |
+| 5    | `==` with custom value types (struct)                 | Not allowed unless explicitly overloaded → compile error otherwise.        |
+
+---
+
+| #    | Name                                                  | Description                                                                 |
+|------|-------------------------------------------------------|-----------------------------------------------------------------------------|
+| 6    | `.Equals()` with reference types (not overridden)     | Default `Equals()` compares references → returns `false` for same content. |
+| 7    | `.Equals()` with reference types (overridden)         | `PersonB` overrides `Equals()` to enable semantic value comparison.        |
+| 8    | `.Equals()` with built-in value types (`int`)         | Built-in types override `Equals()` to compare values directly.             |
+| 9    | `.Equals()` with custom struct                        | Structs support default field-wise comparison via `Equals()` → returns `true`. |
+
+---
+
+| #     | Name                                                 | Description                                                                 |
+|-------|------------------------------------------------------|-----------------------------------------------------------------------------|
+| 10    | `ReferenceEquals()` with reference types             | Strict identity check — returns `true` only if both refer to the same instance. |
+| 11    | `ReferenceEquals()` with boxed `int`                 | Boxing creates separate objects — even equal values return `false`.        |
+| 12    | `ReferenceEquals()` with boxed struct                | Same as above — each struct boxed into a new object → returns `false`.     |
