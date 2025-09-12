@@ -1,45 +1,34 @@
-# 🔍 C# Equality Overview
-
-## 🎯 Purpose
-
-Even after many many years of acting in the .NET field I was recently a bit unsure about the details and differences of `==` and `.Equals()` any more. So I took some time and created this overview to compare them and refresh my knowledge.
-
-This project demonstrates how **equality (`==`, `.Equals()`)** and **identity (`ReferenceEquals`)** behave in C#. It covers reference types, value types, structs, operator overloading, boxing, and interning.
-
----
-
-# 🧪 List of Examples – Equality & Identity in C#
+# 🧪 C# Equality Overview
 
 This is a list of all examples included in `Program.cs`, with a short explanation for each.
 
 ---
 
-## 🔹 `==` Operator Examples
+## 🔹 `==` Operator Default Comparison Behavior
 
-The `==` operator compares references by default for reference types and compares values for built-in value types (like `int`). It can be **overridden** in custom classes to support **semantic value equality**.
-
-
-| #    | Name                                                  | Description                                                                 |
-|------|-------------------------------------------------------|-----------------------------------------------------------------------------|
-| 1    | `==` with reference types (not overridden)            | Compares two objects of the same class with identical content → `false` due to reference comparison. |
-| 2    | `==` with reference types (overridden for value)      | Uses overloaded `==` in `PersonC` class to compare values semantically.     |
-| 3    | `==` with built-in value types (`int`)                | Compares values directly → returns `true` for equal values.                 |
-| 4    | `==` with `string`                                    | `string` overrides `==` to compare content, not reference.                 |
-| 5    | `==` with custom value types (struct)                 | Not allowed unless explicitly overloaded → compile error otherwise.        |
+| Type		 	| Data Type 		| Default comparison behavior, when not overrriden| Notes 						|
+|----------------|-------------------|-------|-----------------------------------------------------------------------|
+| value		 	| `int`    			| **values** | 																		|
+| value		 	| `struct` 			| - | Leads to compiler error, when `==` operator is not explicitly overriden.	|
+| value	 		| `record struct` 	| **values** | Compiler generates implementation for `==`, `!=`, `Equals()`, `GetHashCode()` and `ToString()` |
+| reference	 	| `class`  			| **references** | 																	|
+| reference	 	| `record` 			| **values** | Compiler generates implementation for `==`, `!=`, `Equals()`, `GetHashCode()` and `ToString()` |
+| reference	 	| `string` 			| **values** |  Its overloaded `==` operator first checks reference equality (fast path) and then falls back to value comparison. String interning makes the reference path hit more often. |
 
 ---
 
-## 🔹 `.Equals()` Method Examples
+## 🔹 `.Equals()` Default Comparison behavior
 
-The `.Equals()` method is intended for **semantic content comparison**. For value types, it compares field-by-field. For reference types, you must **override** it to get meaningful value equality.
+The `.Equals()` method is mostly intended for **deep value content comparison**. For value types, it compares values by default. But for reference types you have to override `.Equals()`, otherwise you will get reference comparison.
 
-
-| #    | Name                                                  | Description                                                                 |
-|------|-------------------------------------------------------|-----------------------------------------------------------------------------|
-| 6    | `.Equals()` with reference types (not overridden)     | Default `Equals()` compares references → returns `false` for same content. |
-| 7    | `.Equals()` with reference types (overridden)         | `PersonB` overrides `Equals()` to enable semantic value comparison.        |
-| 8    | `.Equals()` with built-in value types (`int`)         | Built-in types override `Equals()` to compare values directly.             |
-| 9    | `.Equals()` with custom struct                        | Structs support default field-wise comparison via `Equals()` → returns `true`. |
+| Type		 	| Data Type 		| Default comparison behavior, when not overrriden | Notes	 										|
+|---------------|-------------------|-----------|---------------------------------------------------------------------------------------|
+| value		 	| `int`    			| **values** 	| 																						|
+| value		 	| `struct` 			| **values** 	| Compares field-by-field using ValueType.Equals. Older .NET versions used reflection; newer one generate IL, but it's still slower than a custom IEquatable<T> implementation. |
+| value	 		| `record struct` 	| **values** 	| Compiler generates implementation for `==`, `!=`, `Equals()`, `GetHashCode()` and `ToString()` -> Faster than `struct`	|
+| reference	 	| `class`  			| **references** | 																						|
+| reference	 	| `record class` (short: `record`)	| **values** 	| Compiler generates implementation for `Equals()`, `GetHashCode()` and `ToString()`.	|
+| reference	 	| `string` 			| **values** 	| .Equals() compares values directly. String interning is not used in this case. 		|
 
 ---
 
@@ -51,5 +40,5 @@ The `.Equals()` method is intended for **semantic content comparison**. For valu
 | #     | Name                                                 | Description                                                                 |
 |-------|------------------------------------------------------|-----------------------------------------------------------------------------|
 | 10    | `ReferenceEquals()` with reference types             | Strict identity check — returns `true` only if both refer to the same instance. |
-| 11    | `ReferenceEquals()` with boxed `int`                 | Boxing creates separate objects — even equal values return `false`.        |
+| 11    | `ReferenceEquals()` with boxed `int`                 | Boxing creates separate objects — even equal values would return `false`.        |
 | 12    | `ReferenceEquals()` with boxed struct                | Same as above — each struct boxed into a new object → returns `false`.     |
