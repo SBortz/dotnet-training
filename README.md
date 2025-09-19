@@ -4,31 +4,33 @@ This is a list of all examples included in `Program.cs`, with a short explanatio
 
 ---
 
-## 🔹 `==` Operator Default Comparison Behavior
+## 🔹 `==` Operator Comparison Behavior
 
-| Type		 	| Data Type 		| Default comparison behavior, when not overrriden| Notes 						|
-|----------------|-------------------|-------|-----------------------------------------------------------------------|
-| value		 	| `int`    			| **values** | 																		|
-| value		 	| `struct` 			| - | Leads to compiler error, when `==` operator is not explicitly overriden.	|
-| value	 		| `record struct` 	| **values** | Compiler generates implementation for `==`, `!=`, `Equals()`, `GetHashCode()` and `ToString()` |
-| reference	 	| `class`  			| **references** | 																	|
-| reference	 	| `record` 			| **values** | Compiler generates implementation for `==`, `!=`, `Equals()`, `GetHashCode()` and `ToString()` |
-| reference	 	| `string` 			| **values** |  Its overloaded `==` operator first checks reference equality (fast path) and then falls back to value comparison. String interning makes the reference path hit more often. |
+The `==` operator in C# behaves differently depending on the type: for value types, it usually compares the actual values, while for reference types, it compares references (memory addresses) by default. Some types like `record` or `string` have an overloaded `==` operator that performs a value comparison instead. The table below summarizes the default behavior for various types:
+
+| Type          | Category          | `==` Default Behavior | Notes |
+|---------------|-------------------|-------|-----------------------------------------------------------------------|
+| `int`    			| value		 	| **values** | 																		|
+| `struct` 			| value		 	| - 		| Leads to compiler error, when `==` operator is not explicitly overriden.	|
+| `record struct` 	| value 		| **values** | Compiler generates implementation for `==`, `!=`, `Equals()`, `GetHashCode()` and `ToString()` |
+| `class`  			| reference	 	| **references** | 																	|
+| `record` 			| reference	 	| **values** | Compiler generates implementation for `==`, `!=`, `Equals()`, `GetHashCode()` and `ToString()` |
+| `string` 			| reference	 	| **values** |  Its overloaded `==` operator first checks reference equality (fast path) and then falls back to value comparison. String interning makes the reference path hit more often. |
 
 ---
 
-## 🔹 `.Equals()` Default Comparison behavior
+## 🔹 `.Equals()` Comparison behavior
 
 The `.Equals()` method is mostly intended for **deep value content comparison**. For value types, it compares values by default. But for reference types you have to override `.Equals()`, otherwise you will get reference comparison.
 
-| Type		 	| Data Type 		| Default comparison behavior, when not overrriden | Notes	 										|
+| Type          | Category          | `.Equals()` Default Behavior | Notes |
 |---------------|-------------------|-----------|---------------------------------------------------------------------------------------|
-| value		 	| `int`    			| **values** 	| 																						|
-| value		 	| `struct` 			| **values** 	| Compares field-by-field using ValueType.Equals. Older .NET versions used reflection; newer one generate IL, but it's still slower than a custom IEquatable<T> implementation. |
-| value	 		| `record struct` 	| **values** 	| Compiler generates implementation for `==`, `!=`, `Equals()`, `GetHashCode()` and `ToString()` -> Faster than `struct`	|
-| reference	 	| `class`  			| **references** | 																						|
-| reference	 	| `record class` (short: `record`)	| **values** 	| Compiler generates implementation for `Equals()`, `GetHashCode()` and `ToString()`.	|
-| reference	 	| `string` 			| **values** 	| .Equals() compares values directly. String interning is not used in this case. 		|
+| `int`    			| value		 	| **values** 	| 																						|
+| `struct` 			| value		 	| **values** 	| Compares field-by-field using ValueType.Equals. Older .NET versions used reflection; newer one generate IL, but it's still slower than a custom IEquatable<T> implementation. |
+| `record struct` 	| value	 	 	| **values** 	| Compiler generates implementation for `==`, `!=`, `Equals()`, `GetHashCode()` and `ToString()` -> Faster than `struct`	|
+| `class`  			| reference	 	| **references** | 																						|
+| `record class` (short: `record`) 	| reference	 		| **values** 	| Compiler generates implementation for `Equals()`, `GetHashCode()` and `ToString()`.	|
+| `string` 			| reference	 	| **values** 	| .Equals() compares values directly. String interning is not used in this case. 		|
 
 ---
 
