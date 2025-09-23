@@ -3,33 +3,7 @@
 namespace DotnetTraining
 {
     // Test classes and structures for equality tests
-    public class Person
-    {
-        public string Name { get; set; }
-        public int Age { get; set; }
-
-        public Person(string name, int age)
-        {
-            Name = name;
-            Age = age;
-        }
-    }
-
-    public struct Point
-    {
-        public int X { get; set; }
-        public int Y { get; set; }
-
-        public Point(int x, int y)
-        {
-            X = x;
-            Y = y;
-        }
-    }
-
-    public record struct RecordPoint(int X, int Y);
-
-    public record PersonRecord(string Name, int Age);
+    
 
     class Program
     {

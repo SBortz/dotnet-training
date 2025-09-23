@@ -1,5 +1,3 @@
-using DotnetTraining;
-
 namespace Equality.Tests;
 
 /// <summary>
