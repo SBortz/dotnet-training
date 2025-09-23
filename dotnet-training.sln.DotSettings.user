@@ -5,6 +5,8 @@
     &lt;Project Location="/home/sebastian/Projects/50-dotnet-training/Binary.Tests" Presentation="&amp;lt;01-DataTypes&amp;gt;\&amp;lt;Binary.Tests&amp;gt;" /&gt;
     &lt;TestAncestor&gt;
       &lt;TestId&gt;NUnit3x::55766476-9592-46CA-BA53-593ED7FDEA81::net9.0::Collection.Tests.ListInternalsTests&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::7A2D91CE-3A76-4AE1-BE1F-F76C7BFEDDA4::net9.0::Sorting.Tests.BubbleSortTests&lt;/TestId&gt;
     &lt;/TestAncestor&gt;
+    &lt;Project Location="/home/sebastian/Projects/50-dotnet-training/Sorting.Tests" Presentation="&amp;lt;01-DataTypes&amp;gt;\&amp;lt;Sorting.Tests&amp;gt;" /&gt;
   &lt;/Or&gt;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
