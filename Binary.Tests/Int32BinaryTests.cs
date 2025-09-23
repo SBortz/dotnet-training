@@ -9,13 +9,13 @@ public class Int32BinaryRepresentationTests
     public void Int32BinaryRepresentation_PowerOfTwoValues_ShouldShowCorrectBinaryFormat()
     {
         // Test each power of 2 with individual assertions
-        Assert.That(FormatInt32AsBinary(1), Is.EqualTo("0000 0000 0000 0000 0000 0000 0000 0001"), "Value 1 binary representation");
-        Assert.That(FormatInt32AsBinary(2), Is.EqualTo("0000 0000 0000 0000 0000 0000 0000 0010"), "Value 2 binary representation");
-        Assert.That(FormatInt32AsBinary(4), Is.EqualTo("0000 0000 0000 0000 0000 0000 0000 0100"), "Value 4 binary representation");
-        Assert.That(FormatInt32AsBinary(8), Is.EqualTo("0000 0000 0000 0000 0000 0000 0000 1000"), "Value 8 binary representation");
-        Assert.That(FormatInt32AsBinary(16), Is.EqualTo("0000 0000 0000 0000 0000 0000 0001 0000"), "Value 16 binary representation");
-        Assert.That(FormatInt32AsBinary(32), Is.EqualTo("0000 0000 0000 0000 0000 0000 0010 0000"), "Value 32 binary representation");
-        Assert.That(FormatInt32AsBinary(64), Is.EqualTo("0000 0000 0000 0000 0000 0000 0100 0000"), "Value 64 binary representation");
+        Assert.That(FormatInt32AsBinary(1  ), Is.EqualTo("0000 0000 0000 0000 0000 0000 0000 0001"), "Value 1 binary representation");
+        Assert.That(FormatInt32AsBinary(2  ), Is.EqualTo("0000 0000 0000 0000 0000 0000 0000 0010"), "Value 2 binary representation");
+        Assert.That(FormatInt32AsBinary(4  ), Is.EqualTo("0000 0000 0000 0000 0000 0000 0000 0100"), "Value 4 binary representation");
+        Assert.That(FormatInt32AsBinary(8  ), Is.EqualTo("0000 0000 0000 0000 0000 0000 0000 1000"), "Value 8 binary representation");
+        Assert.That(FormatInt32AsBinary(16 ), Is.EqualTo("0000 0000 0000 0000 0000 0000 0001 0000"), "Value 16 binary representation");
+        Assert.That(FormatInt32AsBinary(32 ), Is.EqualTo("0000 0000 0000 0000 0000 0000 0010 0000"), "Value 32 binary representation");
+        Assert.That(FormatInt32AsBinary(64 ), Is.EqualTo("0000 0000 0000 0000 0000 0000 0100 0000"), "Value 64 binary representation");
         Assert.That(FormatInt32AsBinary(128), Is.EqualTo("0000 0000 0000 0000 0000 0000 1000 0000"), "Value 128 binary representation");
         Assert.That(FormatInt32AsBinary(256), Is.EqualTo("0000 0000 0000 0000 0000 0001 0000 0000"), "Value 256 binary representation");
         Assert.That(FormatInt32AsBinary(512), Is.EqualTo("0000 0000 0000 0000 0000 0010 0000 0000"), "Value 512 binary representation");
