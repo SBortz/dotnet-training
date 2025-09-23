@@ -58,7 +58,7 @@ public class Int32BinaryRepresentationTests
         for (int i = 0; i < binary.Length; i += 4)
         {
             if (i > 0) result.Append(' ');
-            result.Append(binary.Substring(i, 4));
+            result.Append(binary.AsSpan(i, 4));
         }
         
         return result.ToString();

@@ -1,4 +1,10 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=a63ade01_002Dc756_002D4c44_002D94fc_002D01339bab627c/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="EqualityOperatorTests" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;Project Location="/home/sebastian/Projects/50-dotnet-training/Equality.Tests" Presentation="&amp;lt;02-Equality&amp;gt;\&amp;lt;Equality.Tests&amp;gt;" /&gt;
+  &lt;Or&gt;
+    &lt;Project Location="/home/sebastian/Projects/50-dotnet-training/Equality.Tests" Presentation="&amp;lt;02-Equality&amp;gt;\&amp;lt;Equality.Tests&amp;gt;" /&gt;
+    &lt;Project Location="/home/sebastian/Projects/50-dotnet-training/Binary.Tests" Presentation="&amp;lt;01-DataTypes&amp;gt;\&amp;lt;Binary.Tests&amp;gt;" /&gt;
+    &lt;TestAncestor&gt;
+      &lt;TestId&gt;NUnit3x::55766476-9592-46CA-BA53-593ED7FDEA81::net9.0::Collection.Tests.ListInternalsTests&lt;/TestId&gt;
+    &lt;/TestAncestor&gt;
+  &lt;/Or&gt;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
