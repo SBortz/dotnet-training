@@ -1,4 +1,4 @@
-using Equality.Lib;
+using Equality.Tests.TestTypes;
 using Point = System.Drawing.Point;
 
 namespace Equality.Tests;

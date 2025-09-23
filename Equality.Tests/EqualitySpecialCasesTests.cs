@@ -1,4 +1,4 @@
-using Equality.Lib;
+using Equality.Tests.TestTypes;
 
 namespace Equality.Tests;
 

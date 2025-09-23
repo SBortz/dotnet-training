@@ -1,4 +1,4 @@
-﻿namespace Equality.Lib;
+﻿namespace Equality.Tests.TestTypes;
 
 public class Person
 {
