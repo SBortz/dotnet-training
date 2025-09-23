@@ -1,3 +1,5 @@
+using Equality.Lib;
+
 namespace Equality.Tests;
 
 /// <summary>

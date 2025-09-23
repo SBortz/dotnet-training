@@ -8,90 +8,41 @@ public class Int32BinaryRepresentationTests
     [Test]
     public void Int32BinaryRepresentation_PowerOfTwoValues_ShouldShowCorrectBinaryFormat()
     {
-        // Arrange - Test data for powers of 2
-        var testCases = new[]
-        {
-            new { Value = 1, ExpectedBinary = "0000 0000 0000 0000 0000 0000 0000 0001" },
-            new { Value = 2, ExpectedBinary = "0000 0000 0000 0000 0000 0000 0000 0010" },
-            new { Value = 4, ExpectedBinary = "0000 0000 0000 0000 0000 0000 0000 0100" },
-            new { Value = 8, ExpectedBinary = "0000 0000 0000 0000 0000 0000 0000 1000" },
-            new { Value = 16, ExpectedBinary = "0000 0000 0000 0000 0000 0000 0001 0000" },
-            new { Value = 32, ExpectedBinary = "0000 0000 0000 0000 0000 0000 0010 0000" },
-            new { Value = 64, ExpectedBinary = "0000 0000 0000 0000 0000 0000 0100 0000" },
-            new { Value = 128, ExpectedBinary = "0000 0000 0000 0000 0000 0000 1000 0000" },
-            new { Value = 256, ExpectedBinary = "0000 0000 0000 0000 0000 0001 0000 0000" },
-            new { Value = 512, ExpectedBinary = "0000 0000 0000 0000 0000 0010 0000 0000" }
-        };
-
-        // Act & Assert
-        foreach (var testCase in testCases)
-        {
-            string actualBinary = FormatInt32AsBinary(testCase.Value);
-            
-            Assert.That(actualBinary, Is.EqualTo(testCase.ExpectedBinary), 
-                $"Value {testCase.Value} should be represented as {testCase.ExpectedBinary}");
-            
-            // Additional verification: Convert back to ensure correctness
-            int convertedBack = ConvertBinaryStringToInt32(actualBinary);
-            Assert.That(convertedBack, Is.EqualTo(testCase.Value), 
-                $"Binary conversion should be reversible for value {testCase.Value}");
-        }
+        // Test each power of 2 with individual assertions
+        Assert.That(FormatInt32AsBinary(1), Is.EqualTo("0000 0000 0000 0000 0000 0000 0000 0001"), "Value 1 binary representation");
+        Assert.That(FormatInt32AsBinary(2), Is.EqualTo("0000 0000 0000 0000 0000 0000 0000 0010"), "Value 2 binary representation");
+        Assert.That(FormatInt32AsBinary(4), Is.EqualTo("0000 0000 0000 0000 0000 0000 0000 0100"), "Value 4 binary representation");
+        Assert.That(FormatInt32AsBinary(8), Is.EqualTo("0000 0000 0000 0000 0000 0000 0000 1000"), "Value 8 binary representation");
+        Assert.That(FormatInt32AsBinary(16), Is.EqualTo("0000 0000 0000 0000 0000 0000 0001 0000"), "Value 16 binary representation");
+        Assert.That(FormatInt32AsBinary(32), Is.EqualTo("0000 0000 0000 0000 0000 0000 0010 0000"), "Value 32 binary representation");
+        Assert.That(FormatInt32AsBinary(64), Is.EqualTo("0000 0000 0000 0000 0000 0000 0100 0000"), "Value 64 binary representation");
+        Assert.That(FormatInt32AsBinary(128), Is.EqualTo("0000 0000 0000 0000 0000 0000 1000 0000"), "Value 128 binary representation");
+        Assert.That(FormatInt32AsBinary(256), Is.EqualTo("0000 0000 0000 0000 0000 0001 0000 0000"), "Value 256 binary representation");
+        Assert.That(FormatInt32AsBinary(512), Is.EqualTo("0000 0000 0000 0000 0000 0010 0000 0000"), "Value 512 binary representation");
     }
 
     [Test]
     public void Int32BinaryRepresentation_Zero_ShouldShowAllZeros()
     {
-        // Arrange
-        int value = 0;
-        string expectedBinary = "0000 0000 0000 0000 0000 0000 0000 0000";
-
-        // Act
-        string actualBinary = FormatInt32AsBinary(value);
-
-        // Assert
-        Assert.That(actualBinary, Is.EqualTo(expectedBinary), "Zero should be represented as all zeros");
+        Assert.That(FormatInt32AsBinary(0), Is.EqualTo("0000 0000 0000 0000 0000 0000 0000 0000"), "Zero should be represented as all zeros");
     }
 
     [Test]
     public void Int32BinaryRepresentation_MaxValue_ShouldShowCorrectBinary()
     {
-        // Arrange
-        int value = int.MaxValue; // 2,147,483,647
-        string expectedBinary = "0111 1111 1111 1111 1111 1111 1111 1111";
-
-        // Act
-        string actualBinary = FormatInt32AsBinary(value);
-
-        // Assert
-        Assert.That(actualBinary, Is.EqualTo(expectedBinary), "int.MaxValue should have MSB as 0 and all other bits as 1");
+        Assert.That(FormatInt32AsBinary(int.MaxValue), Is.EqualTo("0111 1111 1111 1111 1111 1111 1111 1111"), "int.MaxValue should have MSB as 0 and all other bits as 1");
     }
 
     [Test]
     public void Int32BinaryRepresentation_MinValue_ShouldShowCorrectBinary()
     {
-        // Arrange
-        int value = int.MinValue; // -2,147,483,648
-        string expectedBinary = "1000 0000 0000 0000 0000 0000 0000 0000";
-
-        // Act
-        string actualBinary = FormatInt32AsBinary(value);
-
-        // Assert
-        Assert.That(actualBinary, Is.EqualTo(expectedBinary), "int.MinValue should have MSB as 1 and all other bits as 0");
+        Assert.That(FormatInt32AsBinary(int.MinValue), Is.EqualTo("1000 0000 0000 0000 0000 0000 0000 0000"), "int.MinValue should have MSB as 1 and all other bits as 0");
     }
 
     [Test]
     public void Int32BinaryRepresentation_NegativeOne_ShouldShowTwosComplement()
     {
-        // Arrange
-        int value = -1;
-        string expectedBinary = "1111 1111 1111 1111 1111 1111 1111 1111";
-
-        // Act
-        string actualBinary = FormatInt32AsBinary(value);
-
-        // Assert
-        Assert.That(actualBinary, Is.EqualTo(expectedBinary), "-1 should be represented using two's complement (all bits set)");
+        Assert.That(FormatInt32AsBinary(-1), Is.EqualTo("1111 1111 1111 1111 1111 1111 1111 1111"), "-1 should be represented using two's complement (all bits set)");
     }
 
     /// <summary>

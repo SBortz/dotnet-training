@@ -1,3 +1,6 @@
+using Equality.Lib;
+using Point = System.Drawing.Point;
+
 namespace Equality.Tests;
 
 /// <summary>
