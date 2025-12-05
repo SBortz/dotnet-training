@@ -70,17 +70,12 @@ Throwing new exception types in subtypes is considered a behavior change.
 
 C# enforces variance through the `in` and `out` keywords on generic type parameters. Without these keywords, generic types are **invariant** – meaning `IFoo<Car>` and `IFoo<SportsCar>` are completely unrelated types.
 
-### `out` = Covariance (output only)
+`in` / `out` make generic types assignment-compatible:
 
-```csharp
-public interface ICovariant<out T>  // T can only be returned, not accepted
-{
-    T Get();           // ✓ allowed
-    // void Set(T x);  // ✗ compile error!
-}
-```
+| Without Variance | With `in` (Contravariance) | With `out` (Covariance) |
+|------------------|----------------------------|-------------------------|
+| `IFoo<Car>` ≠ `IFoo<SportsCar>` | `IFoo<Car>` → `IFoo<SportsCar>` ✓ | `IFoo<SportsCar>` → `IFoo<Car>` ✓ |
 
-Enables: `ICovariant<SportsCar>` → `ICovariant<Car>`
 
 ### `in` = Contravariance (input only)
 
@@ -93,6 +88,20 @@ public interface IContravariant<in T>  // T can only be accepted, not returned
 ```
 
 Enables: `IContravariant<Car>` → `IContravariant<SportsCar>`
+The actual implementation does not get stricter – it still accepts any `Car`. The interface variable can be typed more specifically, but the instance remains safely substitutable.
+
+### `out` = Covariance (output only)
+
+```csharp
+public interface ICovariant<out T>  // T can only be returned, not accepted
+{
+    T Get();           // ✓ allowed
+    // void Set(T x);  // ✗ compile error!
+}
+```
+
+Enables: `ICovariant<SportsCar>` → `ICovariant<Car>`
+The implementation returns a more specific type (`SportsCar`). Since every `SportsCar` is a `Car`, consumers expecting a `Car` will always receive a valid value.
 
 ### Examples from the .NET Framework
 
