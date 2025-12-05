@@ -5,9 +5,9 @@
 
 ---
 
-## Das Problem: Fat Interfaces
+## The Problem: Fat Interfaces
 
-### Bad: IWorker zwingt Robot zu unsinnigen Methoden
+### Bad: IWorker forces Robot to implement useless methods
 
 ```csharp
 public interface IWorker
@@ -25,13 +25,13 @@ public class Robot : IWorker
 }
 ```
 
-Robot muss `Eat()` und `Sleep()` implementieren, obwohl er das nicht kann.
+Robot must implement `Eat()` and `Sleep()` even though it can't do either.
 
 ---
 
-## Die Lösung: Kleine, spezifische Interfaces
+## The Solution: Small, specific interfaces
 
-### Good: Jedes Gerät implementiert nur was es braucht
+### Good: Each device implements only what it needs
 
 ```csharp
 public interface IPrinter { void Print(string doc); }
@@ -42,17 +42,16 @@ public class SimplePrinter : IPrinter { ... }
 public class MultiFunctionDevice : IPrinter, IScanner, IFax { ... }
 ```
 
-`SimplePrinter` muss weder `IScanner` noch `IFax` implementieren.
+`SimplePrinter` doesn't need to implement `IScanner` or `IFax`.
 
 ---
 
-## Typische Verstöße
+## Typical Violations
 
-| Verstoß | Lösung |
-|---------|--------|
-| `IRepository` mit 20 Methoden | Aufteilen in `IReadRepository`, `IWriteRepository` |
-| `IUserService` macht Auth + Profile + Settings | Separate Services pro Concern |
-| God-Interface mit allem | Role Interfaces nach Verwendungszweck |
+| Violation | Solution |
+|-----------|----------|
+| `IRepository` with 20 methods | Split into `IReadRepository`, `IWriteRepository` |
+| `IUserService` does Auth + Profile + Settings | Separate services per concern |
+| God-interface with everything | Role interfaces by use case |
 
 ---
-
