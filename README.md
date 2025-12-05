@@ -1,46 +1,98 @@
-# 🧪 C# Equality Overview
+# .NET Training
 
-This is a list of all examples included in `Program.cs`, with a short explanation for each.
+A collection of .NET projects for learning and demonstrating various C# and .NET runtime concepts.
+
+## Projects
+
+| Project | Description |
+|---------|-------------|
+| [Equality.Lib](./Equality.Lib/) | Library demonstrating C# equality concepts (`==`, `.Equals()`, `ReferenceEquals()`) |
+| [Equality](./Equality/) | Console app with equality comparison examples |
+| [Equality.Tests](./Equality.Tests/) | Unit tests for equality behavior with different types |
+| [ReserveMemory](./ReserveMemory/) | Tool to demonstrate LOH vs SOH memory allocation and GC behavior |
+| [Sorting.Tests](./Sorting.Tests/) | Sorting algorithm implementations (BubbleSort, QuickSort) with performance tests |
+| [Binary.Tests](./Binary.Tests/) | Tests exploring binary representation of numbers (`int`, `decimal`) |
+| [Collection.Tests](./Collection.Tests/) | Tests exploring `List<T>` internals and collection behavior |
+
+## Quick Start
+
+```bash
+# Clone and restore
+git clone <repo-url>
+cd dotnet-training
+dotnet restore
+
+# Run all tests
+dotnet test
+
+# Run specific project
+dotnet run --project ReserveMemory -- 500MB
+dotnet run --project Equality
+```
+
+## Project Details
+
+### 🔬 Equality
+
+Demonstrates how equality works in C# across different types:
+- `==` operator behavior (value vs reference comparison)
+- `.Equals()` method behavior
+- `ReferenceEquals()` for identity checks
+- Differences between `class`, `struct`, `record`, and `record struct`
+
+📖 [Read more](./Equality.Lib/README.md)
 
 ---
 
-## 🔹 `==` Operator Comparison Behavior
+### 🧠 ReserveMemory
 
-The `==` operator in C# behaves differently depending on the type: for value types, it usually compares the actual values, while for reference types, it compares references (memory addresses) by default. Some types like `record` or `string` have an overloaded `==` operator that performs a value comparison instead. The table below summarizes the default behavior for various types:
+Interactive tool to explore .NET memory management:
+- Allocate memory on LOH (Large Object Heap) or SOH (Small Object Heap)
+- Observe GC behavior across multiple allocation cycles
+- Visualize heap generation sizes
 
-| Type          | Category          | `==` Default Behavior | Notes |
-|---------------|-------------------|-------|-----------------------------------------------------------------------|
-| `int`    			| value		 	| **values** | 																		|
-| `struct` 			| value		 	| - 		| Leads to compiler error, when `==` operator is not explicitly overriden.	|
-| `record struct` 	| value 		| **values** | Compiler generates implementation for `==`, `!=`, `Equals()`, `GetHashCode()` and `ToString()` |
-| `class`  			| reference	 	| **references** | 																	|
-| `record` 			| reference	 	| **values** | Compiler generates implementation for `==`, `!=`, `Equals()`, `GetHashCode()` and `ToString()` |
-| `string` 			| reference	 	| **values** |  Its overloaded `==` operator first checks reference equality (fast path) and then falls back to value comparison. String interning makes the reference path hit more often. |
+```bash
+# Allocate 500MB in LOH
+dotnet run --project ReserveMemory -- 500MB
 
----
+# Allocate in SOH (objects < 85KB)
+dotnet run --project ReserveMemory -- 500MB --objectSize 80KB
 
-## 🔹 `.Equals()` Comparison behavior
+# Multiple iterations to observe GC
+dotnet run --project ReserveMemory -- 200MB -i 5
+```
 
-The `.Equals()` method is mostly intended for **deep value content comparison**. For value types, it compares values by default. But for reference types you have to override `.Equals()`, otherwise you will get reference comparison.
-
-| Type          | Category          | `.Equals()` Default Behavior | Notes |
-|---------------|-------------------|-----------|---------------------------------------------------------------------------------------|
-| `int`    			| value		 	| **values** 	| 																						|
-| `struct` 			| value		 	| **values** 	| Compares field-by-field using ValueType.Equals. Older .NET versions used reflection; newer one generate IL, but it's still slower than a custom IEquatable<T> implementation. |
-| `record struct` 	| value	 	 	| **values** 	| Compiler generates implementation for `==`, `!=`, `Equals()`, `GetHashCode()` and `ToString()` -> Faster than `struct`	|
-| `class`  			| reference	 	| **references** | 																						|
-| `record class` (short: `record`) 	| reference	 		| **values** 	| Compiler generates implementation for `Equals()`, `GetHashCode()` and `ToString()`.	|
-| `string` 			| reference	 	| **values** 	| .Equals() compares values directly. String interning is not used in this case. 		|
+📖 [Read more](./ReserveMemory/README.md)
 
 ---
 
-## 🔹 `ReferenceEquals()` Identity Checks
+### 📊 Sorting.Tests
 
-`Object.ReferenceEquals()` checks if two variables point to the **exact same object in memory**. It is unaffected by overrides or boxing logic and is useful when you want to ensure **true identity**.
+Sorting algorithm implementations with correctness and performance tests:
+- BubbleSort (O(n²))
+- QuickSort (O(n log n))
+- Performance benchmarks comparing both algorithms
 
+---
 
-| #     | Name                                                 | Description                                                                 |
-|-------|------------------------------------------------------|-----------------------------------------------------------------------------|
-| 10    | `ReferenceEquals()` with reference types             | Strict identity check — returns `true` only if both refer to the same instance. |
-| 11    | `ReferenceEquals()` with boxed `int`                 | Boxing creates separate objects — even equal values would return `false`.        |
-| 12    | `ReferenceEquals()` with boxed struct                | Same as above — each struct boxed into a new object → returns `false`.     |
+### 🔢 Binary.Tests
+
+Explore binary representation of .NET numeric types:
+- `int` (32-bit two's complement)
+- `decimal` (128-bit with sign, scale, and mantissa)
+
+---
+
+### 📦 Collection.Tests
+
+Explore `List<T>` internals:
+- Capacity growth behavior
+- Memory allocation patterns
+
+## Requirements
+
+- .NET 9.0 SDK
+
+## License
+
+MIT
