@@ -30,7 +30,7 @@ class Program
         }
 
         // Parse arguments
-        if (!TryParseArguments(args, out long bytesToAllocate, out int objectSize))
+        if (!TryParseArguments(args, out long bytesToAllocate, out int objectSize, out int iterations))
         {
             return;
         }
@@ -41,8 +41,6 @@ class Program
         GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.Default;
 
         int page = Environment.SystemPageSize; // e.g. 4096 on Linux
-        var hold = new List<byte[]>();
-        long total = 0;
 
         // Determine if objects will land in LOH or SOH
         bool isLoh = objectSize >= LOH_THRESHOLD;
@@ -62,76 +60,145 @@ class Program
         configTable.AddRow("Object size", $"[cyan]{FormatBytes(objectSize)}[/]");
         configTable.AddRow("LOH threshold", $"[yellow]{FormatBytes(LOH_THRESHOLD)}[/]");
         configTable.AddRow("Target heap", heapType);
+        configTable.AddRow("Iterations", $"[cyan]{iterations}[/]");
         configTable.AddRow("Page size", $"[grey]{page} bytes[/]");
         
         AnsiConsole.Write(configTable);
         AnsiConsole.WriteLine();
 
-        try
+        // Record initial GC counts
+        int initialGen0 = GC.CollectionCount(0);
+        int initialGen1 = GC.CollectionCount(1);
+        int initialGen2 = GC.CollectionCount(2);
+
+        for (int iteration = 1; iteration <= iterations; iteration++)
         {
-            int objectCount = 0;
-            
-            AnsiConsole.Status()
-                .Spinner(Spinner.Known.Dots)
-                .Start("[yellow]Allocating memory...[/]", ctx =>
-                {
-                    while (total < bytesToAllocate)
-                    {
-                        long remaining = bytesToAllocate - total;
-                        int thisChunk = (int)Math.Min(objectSize, remaining);
-
-                        var chunk = new byte[thisChunk];
-                        hold.Add(chunk);
-
-                        // Touch pages so the kernel actually maps them
-                        uint x = 2463534242; // simple PRNG seed
-
-                        for (int i = 0; i < thisChunk; i += page)
-                        {
-                            // xorshift32 – fast pseudo-random per page
-                            x ^= x << 13; x ^= x >> 17; x ^= x << 5;
-
-                            int end = Math.Min(thisChunk, i + page);
-                            for (int j = i; j < end; j++)
-                            {
-                                // Fill the entire page with (quasi) random bytes
-                                chunk[j] = (byte)(x + (uint)(j - i));
-                            }
-                        }
-
-                        // Also touch last byte in case it doesn't end exactly on page boundary
-                        chunk[thisChunk - 1] = 1;
-
-                        total += thisChunk;
-                        objectCount++;
-                        
-                        ctx.Status($"[yellow]Allocated {objectCount} objects ({FormatBytes(total)})[/]");
-                    }
-                });
-
-            AnsiConsole.MarkupLine($"[green]✓[/] Allocated [cyan]{objectCount}[/] objects totaling [cyan]{FormatBytes(total)}[/]");
-
-            // Show memory statistics using .NET built-in APIs
-            PrintMemoryStats();
-
+            AnsiConsole.Write(new Rule($"[bold yellow]Iteration {iteration} of {iterations}[/]").RuleStyle("yellow"));
             AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine("[grey]Press Enter to release memory...[/]");
-            Console.ReadLine();
+
+            var hold = new List<byte[]>();
+            long total = 0;
+
+            try
+            {
+                int objectCount = 0;
+                
+                AnsiConsole.Status()
+                    .Spinner(Spinner.Known.Dots)
+                    .Start("[yellow]Allocating memory...[/]", ctx =>
+                    {
+                        while (total < bytesToAllocate)
+                        {
+                            long remaining = bytesToAllocate - total;
+                            int thisChunk = (int)Math.Min(objectSize, remaining);
+
+                            var chunk = new byte[thisChunk];
+                            hold.Add(chunk);
+
+                            // Touch pages so the kernel actually maps them
+                            uint x = 2463534242; // simple PRNG seed
+
+                            for (int i = 0; i < thisChunk; i += page)
+                            {
+                                // xorshift32 – fast pseudo-random per page
+                                x ^= x << 13; x ^= x >> 17; x ^= x << 5;
+
+                                int end = Math.Min(thisChunk, i + page);
+                                for (int j = i; j < end; j++)
+                                {
+                                    // Fill the entire page with (quasi) random bytes
+                                    chunk[j] = (byte)(x + (uint)(j - i));
+                                }
+                            }
+
+                            // Also touch last byte in case it doesn't end exactly on page boundary
+                            chunk[thisChunk - 1] = 1;
+
+                            total += thisChunk;
+                            objectCount++;
+                            
+                            ctx.Status($"[yellow]Allocated {objectCount} objects ({FormatBytes(total)})[/]");
+                        }
+                    });
+
+                AnsiConsole.MarkupLine($"[green]✓[/] Allocated [cyan]{objectCount}[/] objects totaling [cyan]{FormatBytes(total)}[/]");
+
+                // Show memory statistics using .NET built-in APIs
+                PrintMemoryStats();
+
+                // Show GC activity since start
+                PrintGCActivity(initialGen0, initialGen1, initialGen2);
+
+                if (iteration < iterations)
+                {
+                    AnsiConsole.WriteLine();
+                    AnsiConsole.MarkupLine("[grey]Releasing memory (clearing references)...[/]");
+                    
+                    // Release all references - GC will collect when it decides to
+                    hold.Clear();
+                    
+                    AnsiConsole.MarkupLine("[dim]Memory released. Waiting for GC to collect naturally...[/]");
+                    AnsiConsole.MarkupLine("[grey]Press Enter to continue to next iteration...[/]");
+                    Console.ReadLine();
+                    
+                    // Show GC activity after release
+                    AnsiConsole.MarkupLine("\n[dim]GC activity after release:[/]");
+                    PrintGCActivity(initialGen0, initialGen1, initialGen2);
+                    AnsiConsole.WriteLine();
+                }
+                else
+                {
+                    AnsiConsole.WriteLine();
+                    AnsiConsole.MarkupLine("[grey]Press Enter to exit...[/]");
+                    Console.ReadLine();
+                }
+            }
+            catch (OutOfMemoryException)
+            {
+                AnsiConsole.MarkupLine($"[red]OutOfMemory[/] at ~{FormatBytes(total)} (observe RES).");
+                Console.ReadLine();
+                break;
+            }
         }
-        catch (OutOfMemoryException)
-        {
-            AnsiConsole.MarkupLine($"[red]OutOfMemory[/] at ~{FormatBytes(total)} (observe RES).");
-            Console.ReadLine();
-        }
+
+        // Final summary
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(new Rule("[bold green]Final Summary[/]").RuleStyle("green"));
+        AnsiConsole.WriteLine();
+        PrintGCActivity(initialGen0, initialGen1, initialGen2);
+    }
+
+    /// <summary>
+    /// Prints GC collection activity since the recorded initial counts.
+    /// </summary>
+    static void PrintGCActivity(int initialGen0, int initialGen1, int initialGen2)
+    {
+        int gen0Delta = GC.CollectionCount(0) - initialGen0;
+        int gen1Delta = GC.CollectionCount(1) - initialGen1;
+        int gen2Delta = GC.CollectionCount(2) - initialGen2;
+
+        var gcTable = new Table()
+            .Border(TableBorder.Simple)
+            .BorderColor(Color.Grey)
+            .AddColumn("[grey]Generation[/]")
+            .AddColumn(new TableColumn("[grey]Collections[/]").RightAligned())
+            .AddColumn(new TableColumn("[grey]Total[/]").RightAligned());
+
+        gcTable.AddRow("Gen 0", $"[green]+{gen0Delta}[/]", $"[dim]{GC.CollectionCount(0)}[/]");
+        gcTable.AddRow("Gen 1", $"[yellow]+{gen1Delta}[/]", $"[dim]{GC.CollectionCount(1)}[/]");
+        gcTable.AddRow("Gen 2 (LOH)", $"[red]+{gen2Delta}[/]", $"[dim]{GC.CollectionCount(2)}[/]");
+
+        AnsiConsole.Write(gcTable);
     }
 
     /// <summary>
     /// Parses command line arguments.
     /// </summary>
-    static bool TryParseArguments(string[] args, out long bytesToAllocate, out int objectSize)
+    static bool TryParseArguments(string[] args, out long bytesToAllocate, out int objectSize, out int iterations)
     {
         bytesToAllocate = 0;
         objectSize = 100 * 1024 * 1024; // Default: 100 MB (LOH)
+        iterations = 1; // Default: single run
 
         string? sizeArg = null;
 
@@ -160,6 +227,22 @@ class Program
                 }
                 
                 objectSize = (int)objSizeBytes;
+                i++; // Skip the value
+            }
+            else if (args[i] is "--iterate" or "-i")
+            {
+                if (i + 1 >= args.Length)
+                {
+                    AnsiConsole.MarkupLine("[red]Error:[/] --iterate requires a value.");
+                    return false;
+                }
+                
+                if (!int.TryParse(args[i + 1], out iterations) || iterations < 1)
+                {
+                    AnsiConsole.MarkupLine($"[red]Error:[/] Invalid iteration count: {args[i + 1]}");
+                    return false;
+                }
+                
                 i++; // Skip the value
             }
             else if (!args[i].StartsWith("-"))
@@ -213,7 +296,7 @@ class Program
 
         // Usage
         AnsiConsole.MarkupLine("[yellow]USAGE:[/]");
-        AnsiConsole.MarkupLine("    ReserveMemory [grey]<size>[/] [grey dim][[--objectSize <size>]][/]");
+        AnsiConsole.MarkupLine("    ReserveMemory [grey]<size>[/] [grey dim][[options]][/]");
         AnsiConsole.MarkupLine("    ReserveMemory [grey]--help[/]");
         AnsiConsole.WriteLine();
 
@@ -226,8 +309,9 @@ class Program
             .AddColumn(new TableColumn("[grey]Description[/]").LeftAligned())
             .AddColumn(new TableColumn("[grey]Default[/]").LeftAligned());
 
-        optionsTable.AddRow("[green]<size>[/]", "Total memory to allocate", "[grey]-[/]");
+        optionsTable.AddRow("[green]<size>[/]", "Total memory to allocate per iteration", "[grey]-[/]");
         optionsTable.AddRow("[green]--objectSize, -o[/]", "Size of each allocated object", "[grey]100MB[/]");
+        optionsTable.AddRow("[green]--iterate, -i[/]", "Number of allocation/release cycles", "[grey]1[/]");
         optionsTable.AddRow("[green]--help, -h[/]", "Show this help", "[grey]-[/]");
 
         AnsiConsole.Write(optionsTable);
@@ -262,6 +346,8 @@ class Program
         exampleTable.AddRow("[cyan]ReserveMemory 500MB --objectSize 100KB[/]", "[grey]Allocate 500 MB in 100 KB objects (LOH)[/]");
         exampleTable.AddRow("[cyan]ReserveMemory 500MB --objectSize 80KB[/]", "[grey]Allocate 500 MB in 80 KB objects (SOH)[/]");
         exampleTable.AddRow("[cyan]ReserveMemory 100MB -o 1MB[/]", "[grey]Allocate 100 MB in 1 MB objects (LOH)[/]");
+        exampleTable.AddRow("[cyan]ReserveMemory 200MB -i 5[/]", "[grey]5 iterations of 200 MB allocation (observe GC)[/]");
+        exampleTable.AddRow("[cyan]ReserveMemory 100MB -o 80KB -i 3[/]", "[grey]3 iterations with SOH objects[/]");
 
         AnsiConsole.Write(exampleTable);
         AnsiConsole.WriteLine();
@@ -271,7 +357,8 @@ class Program
             new Markup($"[dim]LOH Threshold: [/][yellow]85,000 bytes (~85 KB)[/]\n\n" +
                        "[dim]Objects >= threshold → [/][red]LOH[/][dim] (Large Object Heap)[/]\n" +
                        "[dim]Objects <  threshold → [/][green]SOH[/][dim] (Small Object Heap)[/]\n\n" +
-                       "[dim]LOH is only collected during Gen 2 garbage collections.[/]"))
+                       "[dim]LOH is only collected during Gen 2 garbage collections.\n" +
+                       "Use --iterate to observe GC behavior across multiple cycles.[/]"))
             .Header("[bold grey]LOH INFO[/]")
             .Border(BoxBorder.Rounded)
             .BorderColor(Color.Grey)
@@ -376,21 +463,32 @@ class Program
 
         if (maxSize > 0)
         {
-            var barChart = new BarChart()
-                .Label("[bold yellow]Heap Size Distribution[/]")
-                .CenterLabel()
-                .Width(60);
+            AnsiConsole.MarkupLine("[bold yellow]Heap Size Distribution[/]");
+            AnsiConsole.WriteLine();
 
             string[] barLabels = { "Gen 0", "Gen 1", "Gen 2", "LOH", "POH" };
-            Color[] barColors = { Color.Green, Color.Lime, Color.Yellow, Color.Red, Color.Blue };
+            string[] barColors = { "green", "lime", "yellow", "red", "blue" };
+            const int maxBarWidth = 40;
 
             for (int i = 0; i < genInfo.Length && i < barLabels.Length; i++)
             {
-                double valueMB = genInfo[i].SizeAfterBytes / (1024.0 * 1024);
-                barChart.AddItem(barLabels[i], valueMB, barColors[i]);
+                long sizeBytes = genInfo[i].SizeAfterBytes;
+                
+                // Calculate bar width proportional to max size
+                int barWidth = maxSize > 0 
+                    ? (int)Math.Round((double)sizeBytes / maxSize * maxBarWidth) 
+                    : 0;
+                
+                // Ensure at least 1 char if there's any data
+                if (sizeBytes > 0 && barWidth == 0) barWidth = 1;
+                
+                string bar = new string('█', barWidth);
+                string label = barLabels[i].PadRight(6);
+                string formattedSize = FormatBytes(sizeBytes);
+                
+                AnsiConsole.MarkupLine($"  {label} [{barColors[i]}]{bar}[/] {formattedSize}");
             }
-
-            AnsiConsole.Write(barChart);
+            
             AnsiConsole.WriteLine();
         }
 
