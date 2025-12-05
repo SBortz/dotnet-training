@@ -103,3 +103,33 @@ Enables: `IContravariant<Car>` → `IContravariant<SportsCar>`
 | `Func<in T, out TResult>` | Both | T is input, TResult is output |
 
 ---
+
+## Variance Problems in Other Languages
+
+C#'s `in`/`out` keywords enforce type safety at **compile time**. Other languages handle variance differently, sometimes leading to runtime errors.
+
+### Java: Unsafe Array Covariance
+
+Java arrays are covariant, which can cause **runtime exceptions**:
+
+```java
+Object[] objects = new String[3];  // ✓ Compiles (arrays are covariant)
+objects[0] = 42;                   // ✗ Runtime: ArrayStoreException!
+```
+
+The compiler cannot catch this error. C# has the same problem with arrays (for historical reasons), but generics are safe.
+
+### TypeScript: Bivariant Function Parameters (by design)
+
+TypeScript treats method parameters as **bivariant** (both co- and contravariant) for practicality:
+
+```typescript
+interface Animal { name: string }
+interface Dog extends Animal { breed: string }
+
+let animalHandler: (a: Animal) => void;
+let dogHandler: (d: Dog) => void = (d) => console.log(d.breed);
+
+animalHandler = dogHandler;  // ✓ Allowed, but unsafe!
+animalHandler({ name: "Cat" });  // Runtime: 'breed' is undefined
+```
