@@ -6,12 +6,12 @@ using Spectre.Console;
 // =============================================================================
 // LOH (Large Object Heap) Demo
 // =============================================================================
-// This program intentionally allocates large byte arrays (100 MB chunks) that
-// exceed the LOH threshold of 85,000 bytes (~85 KB). All allocations will go
-// directly to the Large Object Heap.
+// This program allocates byte arrays to demonstrate LOH vs SOH behavior.
+// The --objectSize parameter controls whether objects land in LOH or SOH:
+//   - Objects >= 85,000 bytes (~85 KB) → LOH (Large Object Heap)
+//   - Objects <  85,000 bytes          → SOH (Small Object Heap)
 //
 // Key LOH characteristics:
-// - Objects >= 85,000 bytes are allocated on the LOH
 // - LOH is only collected during Gen 2 (full) garbage collections
 // - LOH is NOT compacted by default (can lead to fragmentation)
 // - Use GCSettings.LargeObjectHeapCompactionMode to enable compaction
@@ -19,18 +19,19 @@ using Spectre.Console;
 
 class Program
 {
+    const int LOH_THRESHOLD = 85_000; // Objects >= this size go to LOH
+
     static void Main(string[] args)
     {
-        if (args.Length == 0)
+        if (args.Length == 0 || args[0] is "-h" or "--help" or "/?" or "help")
         {
-            Console.WriteLine("Please specify size, e.g. 10MB or 5GB.");
+            PrintUsage();
             return;
         }
 
-        string input = args[0].Trim();
-        if (!TryParseSize(input, out long bytesToAllocate))
+        // Parse arguments
+        if (!TryParseArguments(args, out long bytesToAllocate, out int objectSize))
         {
-            Console.WriteLine("Invalid size. Allowed suffixes: KB, MB, GB, TB.");
             return;
         }
 
@@ -40,56 +41,243 @@ class Program
         GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.Default;
 
         int page = Environment.SystemPageSize; // e.g. 4096 on Linux
-        const int chunkSize = 100 * 1024 * 1024; // 100 MB – well above LOH threshold (85 KB)
         var hold = new List<byte[]>();
         long total = 0;
 
-        Console.WriteLine($"Allocating {bytesToAllocate:N0} bytes (~{bytesToAllocate / (1024*1024)} MB). PageSize={page}.");
+        // Determine if objects will land in LOH or SOH
+        bool isLoh = objectSize >= LOH_THRESHOLD;
+        string heapType = isLoh ? "[red]LOH[/]" : "[green]SOH[/]";
+        
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(new Rule("[bold blue]Memory Allocation[/]").RuleStyle("blue"));
+        AnsiConsole.WriteLine();
+        
+        var configTable = new Table()
+            .Border(TableBorder.Rounded)
+            .BorderColor(Color.Grey)
+            .AddColumn("[grey]Setting[/]")
+            .AddColumn("[grey]Value[/]");
+        
+        configTable.AddRow("Total to allocate", $"[cyan]{FormatBytes(bytesToAllocate)}[/]");
+        configTable.AddRow("Object size", $"[cyan]{FormatBytes(objectSize)}[/]");
+        configTable.AddRow("LOH threshold", $"[yellow]{FormatBytes(LOH_THRESHOLD)}[/]");
+        configTable.AddRow("Target heap", heapType);
+        configTable.AddRow("Page size", $"[grey]{page} bytes[/]");
+        
+        AnsiConsole.Write(configTable);
+        AnsiConsole.WriteLine();
 
         try
         {
-            while (total < bytesToAllocate)
-            {
-                long remaining = bytesToAllocate - total;
-                int thisChunk = (int)Math.Min(chunkSize, remaining);
-
-                var chunk = new byte[thisChunk];
-                hold.Add(chunk);
-
-                // Touch pages so the kernel actually maps them
-                uint x = 2463534242; // simple PRNG seed
-
-                for (int i = 0; i < thisChunk; i += page)
+            int objectCount = 0;
+            
+            AnsiConsole.Status()
+                .Spinner(Spinner.Known.Dots)
+                .Start("[yellow]Allocating memory...[/]", ctx =>
                 {
-                    // xorshift32 – fast pseudo-random per page
-                    x ^= x << 13; x ^= x >> 17; x ^= x << 5;
-
-                    int end = Math.Min(thisChunk, i + page);
-                    for (int j = i; j < end; j++)
+                    while (total < bytesToAllocate)
                     {
-                        // Fill the entire page with (quasi) random bytes
-                        chunk[j] = (byte)(x + (uint)(j - i));
+                        long remaining = bytesToAllocate - total;
+                        int thisChunk = (int)Math.Min(objectSize, remaining);
+
+                        var chunk = new byte[thisChunk];
+                        hold.Add(chunk);
+
+                        // Touch pages so the kernel actually maps them
+                        uint x = 2463534242; // simple PRNG seed
+
+                        for (int i = 0; i < thisChunk; i += page)
+                        {
+                            // xorshift32 – fast pseudo-random per page
+                            x ^= x << 13; x ^= x >> 17; x ^= x << 5;
+
+                            int end = Math.Min(thisChunk, i + page);
+                            for (int j = i; j < end; j++)
+                            {
+                                // Fill the entire page with (quasi) random bytes
+                                chunk[j] = (byte)(x + (uint)(j - i));
+                            }
+                        }
+
+                        // Also touch last byte in case it doesn't end exactly on page boundary
+                        chunk[thisChunk - 1] = 1;
+
+                        total += thisChunk;
+                        objectCount++;
+                        
+                        ctx.Status($"[yellow]Allocated {objectCount} objects ({FormatBytes(total)})[/]");
                     }
-                }
+                });
 
-                // Also touch last byte in case it doesn't end exactly on page boundary
-                chunk[thisChunk - 1] = 1;
-
-                total += thisChunk;
-                Console.WriteLine($"Committed: {total / (1024 * 1024)} MB");
-            }
+            AnsiConsole.MarkupLine($"[green]✓[/] Allocated [cyan]{objectCount}[/] objects totaling [cyan]{FormatBytes(total)}[/]");
 
             // Show memory statistics using .NET built-in APIs
             PrintMemoryStats();
 
-            Console.WriteLine("\nDone. Press Enter to release...");
+            AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine("[grey]Press Enter to release memory...[/]");
             Console.ReadLine();
         }
         catch (OutOfMemoryException)
         {
-            Console.WriteLine($"OutOfMemory at ~{total / (1024 * 1024)} MB (observe RES).");
+            AnsiConsole.MarkupLine($"[red]OutOfMemory[/] at ~{FormatBytes(total)} (observe RES).");
             Console.ReadLine();
         }
+    }
+
+    /// <summary>
+    /// Parses command line arguments.
+    /// </summary>
+    static bool TryParseArguments(string[] args, out long bytesToAllocate, out int objectSize)
+    {
+        bytesToAllocate = 0;
+        objectSize = 100 * 1024 * 1024; // Default: 100 MB (LOH)
+
+        string? sizeArg = null;
+
+        for (int i = 0; i < args.Length; i++)
+        {
+            if (args[i] is "--objectSize" or "-o")
+            {
+                if (i + 1 >= args.Length)
+                {
+                    AnsiConsole.MarkupLine("[red]Error:[/] --objectSize requires a value.");
+                    return false;
+                }
+                
+                if (!TryParseSize(args[i + 1], out long objSizeBytes))
+                {
+                    AnsiConsole.MarkupLine($"[red]Error:[/] Invalid object size: {args[i + 1]}");
+                    AnsiConsole.WriteLine();
+                    PrintUsage();
+                    return false;
+                }
+                
+                if (objSizeBytes < 1 || objSizeBytes > int.MaxValue)
+                {
+                    AnsiConsole.MarkupLine($"[red]Error:[/] Object size must be between 1 byte and 2 GB.");
+                    return false;
+                }
+                
+                objectSize = (int)objSizeBytes;
+                i++; // Skip the value
+            }
+            else if (!args[i].StartsWith("-"))
+            {
+                sizeArg = args[i];
+            }
+        }
+
+        if (sizeArg == null)
+        {
+            AnsiConsole.MarkupLine("[red]Error:[/] Please specify total size to allocate.");
+            AnsiConsole.WriteLine();
+            PrintUsage();
+            return false;
+        }
+
+        if (!TryParseSize(sizeArg, out bytesToAllocate))
+        {
+            AnsiConsole.MarkupLine("[red]Error:[/] Invalid size format.");
+            AnsiConsole.WriteLine();
+            PrintUsage();
+            return false;
+        }
+
+        if (bytesToAllocate < 1024)
+        {
+            AnsiConsole.MarkupLine("[red]Error:[/] Total size must be at least 1 KB.");
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Prints usage information with Spectre.Console formatting.
+    /// </summary>
+    static void PrintUsage()
+    {
+        // Title Panel
+        var titlePanel = new Panel(
+            new Markup("[bold]Allocates memory to demonstrate LOH vs SOH behavior.[/]\n\n" +
+                       "Use [cyan]--objectSize[/] to control whether objects land in LOH or SOH.\n" +
+                       "Each page is touched to ensure the OS actually commits the memory."))
+            .Header("[bold blue]LOH Memory Reservation Tool[/]")
+            .Border(BoxBorder.Rounded)
+            .BorderColor(Color.Blue)
+            .Padding(1, 0);
+
+        AnsiConsole.Write(titlePanel);
+        AnsiConsole.WriteLine();
+
+        // Usage
+        AnsiConsole.MarkupLine("[yellow]USAGE:[/]");
+        AnsiConsole.MarkupLine("    ReserveMemory [grey]<size>[/] [grey dim][[--objectSize <size>]][/]");
+        AnsiConsole.MarkupLine("    ReserveMemory [grey]--help[/]");
+        AnsiConsole.WriteLine();
+
+        // Options Table
+        var optionsTable = new Table()
+            .Border(TableBorder.Rounded)
+            .BorderColor(Color.Grey)
+            .Title("[yellow]OPTIONS[/]")
+            .AddColumn(new TableColumn("[grey]Option[/]").LeftAligned())
+            .AddColumn(new TableColumn("[grey]Description[/]").LeftAligned())
+            .AddColumn(new TableColumn("[grey]Default[/]").LeftAligned());
+
+        optionsTable.AddRow("[green]<size>[/]", "Total memory to allocate", "[grey]-[/]");
+        optionsTable.AddRow("[green]--objectSize, -o[/]", "Size of each allocated object", "[grey]100MB[/]");
+        optionsTable.AddRow("[green]--help, -h[/]", "Show this help", "[grey]-[/]");
+
+        AnsiConsole.Write(optionsTable);
+        AnsiConsole.WriteLine();
+
+        // Size Suffixes Table
+        var suffixTable = new Table()
+            .Border(TableBorder.Rounded)
+            .BorderColor(Color.Grey)
+            .Title("[yellow]SIZE SUFFIXES[/]")
+            .AddColumn(new TableColumn("[grey]Suffix[/]").Centered())
+            .AddColumn(new TableColumn("[grey]Unit[/]").LeftAligned())
+            .AddColumn(new TableColumn("[grey]Bytes[/]").RightAligned());
+
+        suffixTable.AddRow("[green]KB[/]", "Kilobytes", "1,024");
+        suffixTable.AddRow("[green]MB[/]", "Megabytes", "1,048,576");
+        suffixTable.AddRow("[green]GB[/]", "Gigabytes", "1,073,741,824");
+        suffixTable.AddRow("[green]TB[/]", "Terabytes", "1,099,511,627,776");
+
+        AnsiConsole.Write(suffixTable);
+        AnsiConsole.WriteLine();
+
+        // Examples
+        AnsiConsole.MarkupLine("[yellow]EXAMPLES:[/]");
+        var exampleTable = new Table()
+            .Border(TableBorder.None)
+            .HideHeaders()
+            .AddColumn("Command")
+            .AddColumn("Description");
+
+        exampleTable.AddRow("[cyan]ReserveMemory 500MB[/]", "[grey]Allocate 500 MB in 100 MB objects (LOH)[/]");
+        exampleTable.AddRow("[cyan]ReserveMemory 500MB --objectSize 100KB[/]", "[grey]Allocate 500 MB in 100 KB objects (LOH)[/]");
+        exampleTable.AddRow("[cyan]ReserveMemory 500MB --objectSize 80KB[/]", "[grey]Allocate 500 MB in 80 KB objects (SOH)[/]");
+        exampleTable.AddRow("[cyan]ReserveMemory 100MB -o 1MB[/]", "[grey]Allocate 100 MB in 1 MB objects (LOH)[/]");
+
+        AnsiConsole.Write(exampleTable);
+        AnsiConsole.WriteLine();
+
+        // LOH Info Panel
+        var lohInfo = new Panel(
+            new Markup($"[dim]LOH Threshold: [/][yellow]85,000 bytes (~85 KB)[/]\n\n" +
+                       "[dim]Objects >= threshold → [/][red]LOH[/][dim] (Large Object Heap)[/]\n" +
+                       "[dim]Objects <  threshold → [/][green]SOH[/][dim] (Small Object Heap)[/]\n\n" +
+                       "[dim]LOH is only collected during Gen 2 garbage collections.[/]"))
+            .Header("[bold grey]LOH INFO[/]")
+            .Border(BoxBorder.Rounded)
+            .BorderColor(Color.Grey)
+            .Padding(1, 0);
+
+        AnsiConsole.Write(lohInfo);
     }
 
     static bool TryParseSize(string s, out long bytes)
