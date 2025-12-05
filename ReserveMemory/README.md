@@ -36,18 +36,6 @@ ReserveMemory <size> [options]
 | `--objectSize` | `-o` | Size of each allocated object | 100MB |
 | `--iterate` | `-i` | Number of allocation/release cycles | 1 |
 | `--help` | `-h` | Show help | - |
-
-### Size Suffixes
-
-| Suffix | Unit | Bytes |
-|--------|------|-------|
-| KB | Kilobytes | 1,024 |
-| MB | Megabytes | 1,048,576 |
-| GB | Gigabytes | 1,073,741,824 |
-| TB | Terabytes | 1,099,511,627,776 |
-
-Decimal values are supported (e.g., `1.5GB`).
-
 ## Examples
 
 ### Basic Allocation (LOH)
