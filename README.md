@@ -36,11 +36,11 @@ A collection of .NET projects for learning and demonstrating various C# and .NET
 | [04-InterfaceSegregationPrinciple](./04-SOLID/04-InterfaceSegregationPrinciple/) | ISP | Small, specific interfaces over large ones |
 | [05-DependencyInversionPrinciple](./04-SOLID/05-DependencyInversionPrinciple/) | DIP | Depend on abstractions, not implementations |
 
-### CleanArchitecture-Simple
+### 05-CleanArchitecture
 
 | Project | Description |
 |---------|-------------|
-| [CleanArchitecture-Simple](./CleanArchitecture-Simple/) | Layered architecture with Domain, Application, Infrastructure, Presentation |
+| [CleanArchitecture-Simple](./05-CleanArchitecture/CleanArchitecture-Simple/) | Layered architecture with Domain, Application, Infrastructure, Presentation |
 
 
 ## Project Details
