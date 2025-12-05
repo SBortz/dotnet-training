@@ -3,30 +3,30 @@
 > *"A class should have only one reason to change."*
 > — Robert C. Martin
 
-Später präzisiert:
+Later clarified:
 
 > *"Gather together the things that change for the same reasons. Separate those things that change for different reasons."*
 
 ---
 
-## Das Invoice-Beispiel
+## The Invoice Example
 
-### Bad: Eine Klasse macht alles
+### Bad: One class does everything
 
 ```csharp
 public class Invoice
 {
-    public decimal CalculateTotal() { ... }  // Änderungsgrund 1: Berechnungslogik
-    public string ExportToPdf() { ... }      // Änderungsgrund 2: PDF-Format
-    public string Print() { ... }            // Änderungsgrund 3: Drucker-API
+    public decimal CalculateTotal() { ... }  // Reason 1: Calculation logic
+    public string ExportToPdf() { ... }      // Reason 2: PDF format
+    public string Print() { ... }            // Reason 3: Printer API
 }
 ```
 
-Steuerberechnung ändert sich? → `Invoice` ändern.  
-PDF-Layout ändert sich? → `Invoice` ändern.  
-Drucker-API ändert sich? → `Invoice` ändern.
+Tax calculation changes? → Modify `Invoice`.  
+PDF layout changes? → Modify `Invoice`.  
+Printer API changes? → Modify `Invoice`.
 
-### Good: Getrennte Verantwortlichkeiten
+### Good: Separated responsibilities
 
 ```csharp
 public record Invoice(string CustomerName, List<InvoiceItem> Items, decimal TaxRate);
@@ -36,25 +36,25 @@ public class InvoicePdfExporter { string Export(Invoice i) { ... } }
 public class InvoicePrinter     { string Print(Invoice i) { ... } }
 ```
 
-Jede Klasse hat einen Änderungsgrund. Änderungen sind isoliert.
+Each class has one reason to change. Changes are isolated.
 
 ---
 
-## SRP-Verstöße erkennen
+## Identifying SRP Violations
 
-Frag dich:
-1. **"Was macht diese Klasse?"** — Wenn "und" in der Antwort vorkommt, SRP-Verdacht
-2. **"Wer könnte Änderungen verlangen?"** — Verschiedene Stakeholder = verschiedene Responsibilities
-3. **"Kann ich das isoliert testen?"** — Wenn du unrelated Dependencies brauchst, aufteilen
+Ask yourself:
+1. **"What does this class do?"** — If "and" appears in the answer, SRP suspect
+2. **"Who might request changes?"** — Different stakeholders = different responsibilities
+3. **"Can I test this in isolation?"** — If you need unrelated dependencies, consider splitting
 
 ---
 
-## Typische Verstöße
+## Typical Violations
 
-| Verstoß | Lösung |
-|---------|--------|
-| Entity speichert sich selbst | `Entity` + `Repository` trennen |
-| Service validiert und verarbeitet | `Validator` + `Processor` trennen |
-| Controller macht Logik und Formatierung | `Controller`, `Service`, `Formatter` trennen |
+| Violation | Solution |
+|-----------|----------|
+| Entity saves itself | Separate `Entity` + `Repository` |
+| Service validates and processes | Separate `Validator` + `Processor` |
+| Controller handles logic and formatting | Separate `Controller`, `Service`, `Formatter` |
 
 ---

@@ -3,12 +3,12 @@
 > *"Software entities should be open for extension, but closed for modification."*
 > — Bertrand Meyer, 1988
 
-- **Open for extension**: Du kannst neues Verhalten hinzufügen
-- **Closed for modification**: Du änderst keinen bestehenden Code
+- **Open for extension**: You can add new behavior
+- **Closed for modification**: You don't change existing code
 
 ---
 
-## Das Shape-Beispiel
+## The Shape Example
 
 ### Bad: Switch/If-Else Chain
 
@@ -21,15 +21,15 @@ public class AreaCalculator
             return r.Width * r.Height;
         if (shape is Circle c)
             return Math.PI * c.Radius * c.Radius;
-        // Triangle hinzufügen? Diese Klasse muss geändert werden!
+        // Adding Triangle? This class must be modified!
         throw new NotSupportedException();
     }
 }
 ```
 
-Jede neue Form erfordert eine Änderung an `AreaCalculator`.
+Each new shape requires modifying `AreaCalculator`.
 
-### Good: Polymorphismus via Interface
+### Good: Polymorphism via Interface
 
 ```csharp
 public interface IShape
@@ -49,26 +49,26 @@ public class AreaCalculator
 }
 ```
 
-Neue Forms = neue Klassen. `AreaCalculator` bleibt unverändert.
+New shapes = new classes. `AreaCalculator` stays unchanged.
 
 ---
 
-## Techniken für OCP
+## Techniques for OCP
 
-| Technik | Beschreibung |
-|---------|--------------|
-| Interfaces | Contracts die neue Implementierungen erfüllen können |
-| Abstract Classes | Basisverhalten mit virtual/abstract Methods |
-| Strategy Pattern | Verschiedene Algorithmen zur Laufzeit injizieren |
+| Technique | Description |
+|-----------|-------------|
+| Interfaces | Contracts that new implementations can fulfill |
+| Abstract Classes | Base behavior with virtual/abstract methods |
+| Strategy Pattern | Inject different algorithms at runtime |
 
 ---
 
-## Typische Verstöße
+## Typical Violations
 
-| Code Smell | Lösung |
-|------------|--------|
-| `switch (shape.Type)` | Polymorphismus |
-| `if (x is A) ... else if (x is B)` | Interface + Implementierungen |
+| Code Smell | Solution |
+|------------|----------|
+| `switch (shape.Type)` | Polymorphism |
+| `if (x is A) ... else if (x is B)` | Interface + implementations |
 | `switch (status) { case New: ... }` | State/Strategy Pattern |
 
 ---
