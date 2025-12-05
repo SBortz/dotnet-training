@@ -26,7 +26,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "03-LiskovSubstitutionPatter
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "01-SingleResponsibilityPrinciple", "04-SOLID\01-SingleResponsibilityPrinciple\01-SingleResponsibilityPrinciple.csproj", "{341F58DF-0682-4753-BF34-C54FEAEA1A08}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "02-OpenForExtensionClosedForModification", "04-SOLID\02-OpenForExtensionClosedForModification\02-OpenForExtensionClosedForModification.csproj", "{6E05B125-7E5F-4DA7-B1D0-13625A76EC81}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "02-OpenClosedPrinciple", "04-SOLID\02-OpenClosedPrinciple\02-OpenClosedPrinciple.csproj", "{6E05B125-7E5F-4DA7-B1D0-13625A76EC81}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "04-InterfaceSegregationPrinciple", "04-SOLID\04-InterfaceSegregationPrinciple\04-InterfaceSegregationPrinciple.csproj", "{5B6559E6-2BE5-4EAA-BD05-BE556AA80C1E}"
 EndProject
