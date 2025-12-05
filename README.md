@@ -28,13 +28,13 @@ A collection of .NET projects for learning and demonstrating various C# and .NET
 
 ### 04-SOLID
 
-| Project | Prinzip | Description |
-|---------|---------|-------------|
-| [01-SingleResponsibilityPrinciple](./04-SOLID/01-SingleResponsibilityPrinciple/) | SRP | Eine Klasse, ein Änderungsgrund |
-| [02-OpenClosedPrinciple](./04-SOLID/02-OpenClosedPrinciple/) | OCP | Offen für Erweiterung, geschlossen für Modifikation |
-| [03-LiskovSubstitutionPattern.Tests](./04-SOLID/03-LiskovSubstitutionPattern.Tests/) | LSP | Subtypen müssen Basistypen ersetzen können |
-| [04-InterfaceSegregationPrinciple](./04-SOLID/04-InterfaceSegregationPrinciple/) | ISP | Kleine, spezifische Interfaces statt großer |
-| [05-DependencyInversionPrinciple](./04-SOLID/05-DependencyInversionPrinciple/) | DIP | Abhängig von Abstraktionen, nicht Implementierungen |
+| Project | Principle | Description |
+|---------|-----------|-------------|
+| [01-SingleResponsibilityPrinciple](./04-SOLID/01-SingleResponsibilityPrinciple/) | SRP | One class, one reason to change |
+| [02-OpenClosedPrinciple](./04-SOLID/02-OpenClosedPrinciple/) | OCP | Open for extension, closed for modification |
+| [03-LiskovSubstitutionPattern.Tests](./04-SOLID/03-LiskovSubstitutionPattern.Tests/) | LSP | Subtypes must be substitutable for base types |
+| [04-InterfaceSegregationPrinciple](./04-SOLID/04-InterfaceSegregationPrinciple/) | ISP | Small, specific interfaces over large ones |
+| [05-DependencyInversionPrinciple](./04-SOLID/05-DependencyInversionPrinciple/) | DIP | Depend on abstractions, not implementations |
 
 ## Quick Start
 
