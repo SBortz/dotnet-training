@@ -1,91 +1,60 @@
 ﻿# Single Responsibility Principle (SRP)
 
-> *"A module should be responsible to one, and only one, actor."*
-
-The term **actor** refers to a group (consisting of one or more stakeholders or users) that requires a change in the module.
-
-**Robert C. Martin**, the originator of the term, expresses the principle as:
-
 > *"A class should have only one reason to change."*
+> — Robert C. Martin
 
-Because of confusion around the word "reason", he later clarified his meaning:
+Später präzisiert:
 
 > *"Gather together the things that change for the same reasons. Separate those things that change for different reasons."*
 
-The principle is also about **roles or actors**. For example, while they might be the same person, the role of an accountant is different from a database administrator. Hence, each module should be responsible for each role.
-
 ---
 
-## Summary
+## Das Invoice-Beispiel
 
-**Each class should do one thing and do it well.**
-
-When a class has multiple responsibilities, changes to one responsibility may break the others. This leads to:
-- Tight coupling
-- Difficult testing
-- Fragile code
-
----
-
-## The Invoice Example
-
-### ❌ Bad Example: One Class Does Everything
+### Bad: Eine Klasse macht alles
 
 ```csharp
 public class Invoice
 {
-    public decimal CalculateTotal() { ... }  // Reason 1: Calculation logic
-    public string ExportToPdf() { ... }      // Reason 2: PDF format
-    public string Print() { ... }            // Reason 3: Printing
+    public decimal CalculateTotal() { ... }  // Änderungsgrund 1: Berechnungslogik
+    public string ExportToPdf() { ... }      // Änderungsgrund 2: PDF-Format
+    public string Print() { ... }            // Änderungsgrund 3: Drucker-API
 }
 ```
 
-**Problems:**
-- If tax calculation changes → modify `Invoice`
-- If PDF layout changes → modify `Invoice`
-- If printer API changes → modify `Invoice`
-- Testing calculation requires the whole class (including PDF/print dependencies)
+Steuerberechnung ändert sich? → `Invoice` ändern.  
+PDF-Layout ändert sich? → `Invoice` ändern.  
+Drucker-API ändert sich? → `Invoice` ändern.
 
-### ✅ Good Example: Separated Responsibilities
+### Good: Getrennte Verantwortlichkeiten
 
 ```csharp
 public record Invoice(string CustomerName, List<InvoiceItem> Items, decimal TaxRate);
 
-public class InvoiceCalculator    { decimal CalculateTotal(Invoice i) { ... } }
-public class InvoicePdfExporter   { string Export(Invoice i) { ... } }
-public class InvoicePrinter       { string Print(Invoice i) { ... } }
+public class InvoiceCalculator  { decimal CalculateTotal(Invoice i) { ... } }
+public class InvoicePdfExporter { string Export(Invoice i) { ... } }
+public class InvoicePrinter     { string Print(Invoice i) { ... } }
 ```
 
-**Benefits:**
-- Each class has **one reason to change**
-- Classes can be **tested independently**
-- Changes are **isolated** – PDF changes don't affect calculation
-- Easy to **mock dependencies** in tests
+Jede Klasse hat einen Änderungsgrund. Änderungen sind isoliert.
 
 ---
 
-## How to Identify SRP Violations
+## SRP-Verstöße erkennen
 
-Ask yourself:
-1. **"What does this class do?"** – If you use "and" in the answer, it might violate SRP
-2. **"Who might request changes?"** – Different stakeholders = different responsibilities
-3. **"Can I test this in isolation?"** – If you need unrelated dependencies, consider splitting
-
-### Example Answers:
-
-❌ *"This class calculates totals **and** exports PDFs **and** prints invoices."*
-
-✅ *"This class calculates invoice totals."*
+Frag dich:
+1. **"Was macht diese Klasse?"** — Wenn "und" in der Antwort vorkommt, SRP-Verdacht
+2. **"Wer könnte Änderungen verlangen?"** — Verschiedene Stakeholder = verschiedene Responsibilities
+3. **"Kann ich das isoliert testen?"** — Wenn du unrelated Dependencies brauchst, aufteilen
 
 ---
 
-## Common SRP Violations
+## Typische Verstöße
 
-| Violation | Solution |
-|-----------|----------|
-| Entity saves itself to database | Separate `Entity` and `Repository` |
-| Service validates and processes | Separate `Validator` and `Processor` |
-| Controller handles logic and formatting | Separate `Controller`, `Service`, `Formatter` |
-| Class logs its own actions | Inject an `ILogger` dependency |
+| Verstoß | Lösung |
+|---------|--------|
+| Entity speichert sich selbst | `Entity` + `Repository` trennen |
+| Service validiert und verarbeitet | `Validator` + `Processor` trennen |
+| Controller macht Logik und Formatierung | `Controller`, `Service`, `Formatter` trennen |
 
 ---
