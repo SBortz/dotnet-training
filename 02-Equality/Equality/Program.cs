@@ -1,4 +1,6 @@
 ﻿using System;
+using Equality.Tests.TestTypes;
+using Point = System.Drawing.Point;
 
 namespace DotnetTraining
 {
