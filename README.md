@@ -26,6 +26,16 @@ A collection of .NET projects for learning and demonstrating various C# and .NET
 |---------|-------------|
 | [ReserveMemory](./03-Memory/ReserveMemory/) | Tool to demonstrate LOH vs SOH memory allocation and GC behavior |
 
+### 04-SOLID
+
+| Project | Prinzip | Description |
+|---------|---------|-------------|
+| [01-SingleResponsibilityPrinciple](./04-SOLID/01-SingleResponsibilityPrinciple/) | SRP | Eine Klasse, ein Änderungsgrund |
+| [02-OpenClosedPrinciple](./04-SOLID/02-OpenClosedPrinciple/) | OCP | Offen für Erweiterung, geschlossen für Modifikation |
+| [03-LiskovSubstitutionPattern.Tests](./04-SOLID/03-LiskovSubstitutionPattern.Tests/) | LSP | Subtypen müssen Basistypen ersetzen können |
+| [04-InterfaceSegregationPrinciple](./04-SOLID/04-InterfaceSegregationPrinciple/) | ISP | Kleine, spezifische Interfaces statt großer |
+| [05-DependencyInversionPrinciple](./04-SOLID/05-DependencyInversionPrinciple/) | DIP | Abhängig von Abstraktionen, nicht Implementierungen |
+
 ## Quick Start
 
 ```bash
@@ -44,7 +54,7 @@ dotnet run --project 02-Equality/Equality
 
 ## Project Details
 
-### 🔬 Equality
+### Equality
 
 Demonstrates how equality works in C# across different types:
 - `==` operator behavior (value vs reference comparison)
@@ -52,11 +62,11 @@ Demonstrates how equality works in C# across different types:
 - `ReferenceEquals()` for identity checks
 - Differences between `class`, `struct`, `record`, and `record struct`
 
-📖 [Read more](./02-Equality/Equality.Lib/README.md)
+[Read more](./02-Equality/Equality.Lib/README.md)
 
 ---
 
-### 🧠 ReserveMemory
+### ReserveMemory
 
 Interactive tool to explore .NET memory management:
 - Allocate memory on LOH (Large Object Heap) or SOH (Small Object Heap)
@@ -74,11 +84,11 @@ dotnet run --project 03-Memory/ReserveMemory -- 500MB --objectSize 80KB
 dotnet run --project 03-Memory/ReserveMemory -- 200MB -i 5
 ```
 
-📖 [Read more](./03-Memory/ReserveMemory/README.md)
+[Read more](./03-Memory/ReserveMemory/README.md)
 
 ---
 
-### 📊 Sorting.Tests
+### Sorting.Tests
 
 Sorting algorithm implementations with correctness and performance tests:
 - BubbleSort (O(n²))
@@ -87,7 +97,7 @@ Sorting algorithm implementations with correctness and performance tests:
 
 ---
 
-### 🔢 Binary.Tests
+### Binary.Tests
 
 Explore binary representation of .NET numeric types:
 - `int` (32-bit two's complement)
@@ -95,7 +105,7 @@ Explore binary representation of .NET numeric types:
 
 ---
 
-### 📦 Collection.Tests
+### Collection.Tests
 
 Explore `List<T>` internals:
 - Capacity growth behavior
@@ -103,7 +113,7 @@ Explore `List<T>` internals:
 
 ## Requirements
 
-- .NET 9.0 SDK
+- .NET 10.0 SDK
 
 ## License
 
