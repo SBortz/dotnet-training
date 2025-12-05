@@ -36,23 +36,35 @@ A collection of .NET projects for learning and demonstrating various C# and .NET
 | [04-InterfaceSegregationPrinciple](./04-SOLID/04-InterfaceSegregationPrinciple/) | ISP | Small, specific interfaces over large ones |
 | [05-DependencyInversionPrinciple](./04-SOLID/05-DependencyInversionPrinciple/) | DIP | Depend on abstractions, not implementations |
 
-## Quick Start
-
-```bash
-# Clone and restore
-git clone <repo-url>
-cd dotnet-training
-dotnet restore
-
-# Run all tests
-dotnet test
-
-# Run specific project
-dotnet run --project 03-Memory/ReserveMemory -- 500MB
-dotnet run --project 02-Equality/Equality
-```
 
 ## Project Details
+
+### Data Types
+
+Just simple tests to explore data models in C#.
+
+#### Sorting.Tests
+
+Sorting algorithm implementations with correctness and performance tests:
+- BubbleSort (O(n²))
+- QuickSort (O(n log n))
+- Performance benchmarks comparing both algorithms
+
+---
+
+#### Binary.Tests
+
+Explore binary representation of .NET numeric types:
+- `int` (32-bit two's complement)
+- `decimal` (128-bit with sign, scale, and mantissa)
+
+---
+
+#### Collection.Tests
+
+Explore `List<T>` internals:
+- Capacity growth behavior
+- Memory allocation patterns
 
 ### Equality
 
@@ -88,28 +100,7 @@ dotnet run --project 03-Memory/ReserveMemory -- 200MB -i 5
 
 ---
 
-### Sorting.Tests
 
-Sorting algorithm implementations with correctness and performance tests:
-- BubbleSort (O(n²))
-- QuickSort (O(n log n))
-- Performance benchmarks comparing both algorithms
-
----
-
-### Binary.Tests
-
-Explore binary representation of .NET numeric types:
-- `int` (32-bit two's complement)
-- `decimal` (128-bit with sign, scale, and mantissa)
-
----
-
-### Collection.Tests
-
-Explore `List<T>` internals:
-- Capacity growth behavior
-- Memory allocation patterns
 
 ## Requirements
 
