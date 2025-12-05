@@ -4,15 +4,27 @@ A collection of .NET projects for learning and demonstrating various C# and .NET
 
 ## Projects
 
+### 01-DataTypes
+
 | Project | Description |
 |---------|-------------|
-| [Equality.Lib](./Equality.Lib/) | Library demonstrating C# equality concepts (`==`, `.Equals()`, `ReferenceEquals()`) |
-| [Equality](./Equality/) | Console app with equality comparison examples |
-| [Equality.Tests](./Equality.Tests/) | Unit tests for equality behavior with different types |
-| [ReserveMemory](./ReserveMemory/) | Tool to demonstrate LOH vs SOH memory allocation and GC behavior |
-| [Sorting.Tests](./Sorting.Tests/) | Sorting algorithm implementations (BubbleSort, QuickSort) with performance tests |
-| [Binary.Tests](./Binary.Tests/) | Tests exploring binary representation of numbers (`int`, `decimal`) |
-| [Collection.Tests](./Collection.Tests/) | Tests exploring `List<T>` internals and collection behavior |
+| [Binary.Tests](./01-DataTypes/Binary.Tests/) | Tests exploring binary representation of numbers (`int`, `decimal`) |
+| [Collection.Tests](./01-DataTypes/Collection.Tests/) | Tests exploring `List<T>` internals and collection behavior |
+| [Sorting.Tests](./01-DataTypes/Sorting.Tests/) | Sorting algorithm implementations (BubbleSort, QuickSort) with performance tests |
+
+### 02-Equality
+
+| Project | Description |
+|---------|-------------|
+| [Equality.Lib](./02-Equality/Equality.Lib/) | Library demonstrating C# equality concepts (`==`, `.Equals()`, `ReferenceEquals()`) |
+| [Equality](./02-Equality/Equality/) | Console app with equality comparison examples |
+| [Equality.Tests](./02-Equality/Equality.Tests/) | Unit tests for equality behavior with different types |
+
+### 03-Memory
+
+| Project | Description |
+|---------|-------------|
+| [ReserveMemory](./03-Memory/ReserveMemory/) | Tool to demonstrate LOH vs SOH memory allocation and GC behavior |
 
 ## Quick Start
 
@@ -26,8 +38,8 @@ dotnet restore
 dotnet test
 
 # Run specific project
-dotnet run --project ReserveMemory -- 500MB
-dotnet run --project Equality
+dotnet run --project 03-Memory/ReserveMemory -- 500MB
+dotnet run --project 02-Equality/Equality
 ```
 
 ## Project Details
@@ -40,7 +52,7 @@ Demonstrates how equality works in C# across different types:
 - `ReferenceEquals()` for identity checks
 - Differences between `class`, `struct`, `record`, and `record struct`
 
-📖 [Read more](./Equality.Lib/README.md)
+📖 [Read more](./02-Equality/Equality.Lib/README.md)
 
 ---
 
@@ -53,16 +65,16 @@ Interactive tool to explore .NET memory management:
 
 ```bash
 # Allocate 500MB in LOH
-dotnet run --project ReserveMemory -- 500MB
+dotnet run --project 03-Memory/ReserveMemory -- 500MB
 
 # Allocate in SOH (objects < 85KB)
-dotnet run --project ReserveMemory -- 500MB --objectSize 80KB
+dotnet run --project 03-Memory/ReserveMemory -- 500MB --objectSize 80KB
 
 # Multiple iterations to observe GC
-dotnet run --project ReserveMemory -- 200MB -i 5
+dotnet run --project 03-Memory/ReserveMemory -- 200MB -i 5
 ```
 
-📖 [Read more](./ReserveMemory/README.md)
+📖 [Read more](./03-Memory/ReserveMemory/README.md)
 
 ---
 
