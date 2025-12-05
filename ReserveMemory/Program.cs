@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime;
-using System.Runtime.InteropServices;
+using Spectre.Console;
 
 // =============================================================================
 // LOH (Large Object Heap) Demo
@@ -117,58 +117,129 @@ class Program
     }
 
     /// <summary>
-    /// Prints detailed memory statistics using .NET built-in GC APIs.
+    /// Prints detailed memory statistics using .NET built-in GC APIs with Spectre.Console.
     /// </summary>
     static void PrintMemoryStats()
     {
-        Console.WriteLine();
-        Console.WriteLine("═══════════════════════════════════════════════════════════════");
-        Console.WriteLine("                    MEMORY STATISTICS (.NET)                   ");
-        Console.WriteLine("═══════════════════════════════════════════════════════════════");
-
         // Total managed memory (optionally force full GC first with 'true')
         long totalManaged = GC.GetTotalMemory(forceFullCollection: false);
-        Console.WriteLine($"Total Managed Memory:    {FormatBytes(totalManaged)}");
 
         // Detailed GC memory info (available since .NET Core 3.0)
         GCMemoryInfo gcInfo = GC.GetGCMemoryInfo();
 
-        Console.WriteLine($"Heap Size:               {FormatBytes(gcInfo.HeapSizeBytes)}");
-        Console.WriteLine($"Fragmented Bytes:        {FormatBytes(gcInfo.FragmentedBytes)}");
-        Console.WriteLine($"Memory Load (bytes):     {FormatBytes(gcInfo.MemoryLoadBytes)}");
-        Console.WriteLine($"Total Available Memory:  {FormatBytes(gcInfo.TotalAvailableMemoryBytes)}");
-        Console.WriteLine($"High Memory Load Threshold: {gcInfo.HighMemoryLoadThresholdBytes / (1024.0 * 1024 * 1024):F2} GB");
+        // Header
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(new Rule("[bold blue]MEMORY STATISTICS (.NET)[/]").RuleStyle("blue"));
+        AnsiConsole.WriteLine();
 
-        Console.WriteLine();
-        Console.WriteLine("── Heap Generation Sizes ──────────────────────────────────────");
+        // Overview Table
+        var overviewTable = new Table()
+            .Border(TableBorder.Rounded)
+            .BorderColor(Color.Grey)
+            .Title("[bold yellow]Overview[/]")
+            .AddColumn(new TableColumn("[grey]Metric[/]").LeftAligned())
+            .AddColumn(new TableColumn("[grey]Value[/]").RightAligned());
 
+        overviewTable.AddRow("Total Managed Memory", $"[green]{FormatBytes(totalManaged)}[/]");
+        overviewTable.AddRow("Heap Size", $"[green]{FormatBytes(gcInfo.HeapSizeBytes)}[/]");
+        overviewTable.AddRow("Fragmented Bytes", $"[yellow]{FormatBytes(gcInfo.FragmentedBytes)}[/]");
+        overviewTable.AddRow("Memory Load", $"[cyan]{FormatBytes(gcInfo.MemoryLoadBytes)}[/]");
+        overviewTable.AddRow("Total Available Memory", $"[blue]{FormatBytes(gcInfo.TotalAvailableMemoryBytes)}[/]");
+        overviewTable.AddRow("High Memory Threshold", $"[blue]{gcInfo.HighMemoryLoadThresholdBytes / (1024.0 * 1024 * 1024):F2} GB[/]");
+        overviewTable.AddRow("Working Set (Process)", $"[magenta]{FormatBytes(Environment.WorkingSet)}[/]");
+
+        AnsiConsole.Write(overviewTable);
+        AnsiConsole.WriteLine();
+
+        // Heap Generation Table
         // GenerationInfo array: [0]=Gen0, [1]=Gen1, [2]=Gen2, [3]=LOH, [4]=POH
         ReadOnlySpan<GCGenerationInfo> genInfo = gcInfo.GenerationInfo;
+        string[] genNames = { "Gen 0 (SOH)", "Gen 1 (SOH)", "Gen 2 (SOH)", "[bold red]LOH[/]", "POH" };
+        Color[] genColors = { Color.Green, Color.Green, Color.Green, Color.Red, Color.Blue };
 
-        string[] genNames = { "Gen 0 (SOH)", "Gen 1 (SOH)", "Gen 2 (SOH)", "LOH", "POH" };
+        var heapTable = new Table()
+            .Border(TableBorder.Rounded)
+            .BorderColor(Color.Grey)
+            .Title("[bold yellow]Heap Generation Sizes[/]")
+            .AddColumn(new TableColumn("[grey]Generation[/]").LeftAligned())
+            .AddColumn(new TableColumn("[grey]Size[/]").RightAligned())
+            .AddColumn(new TableColumn("[grey]Fragmentation[/]").RightAligned());
+
         for (int i = 0; i < genInfo.Length && i < genNames.Length; i++)
         {
-            Console.WriteLine($"  {genNames[i],-14} Size: {FormatBytes(genInfo[i].SizeAfterBytes),-12} " +
-                              $"Fragmentation: {FormatBytes(genInfo[i].FragmentationAfterBytes)}");
+            var color = genColors[i];
+            heapTable.AddRow(
+                genNames[i],
+                $"[{color}]{FormatBytes(genInfo[i].SizeAfterBytes)}[/]",
+                $"[yellow]{FormatBytes(genInfo[i].FragmentationAfterBytes)}[/]"
+            );
         }
 
-        Console.WriteLine();
-        Console.WriteLine("── GC Collection Counts ───────────────────────────────────────");
-        Console.WriteLine($"  Gen 0 collections: {GC.CollectionCount(0)}");
-        Console.WriteLine($"  Gen 1 collections: {GC.CollectionCount(1)}");
-        Console.WriteLine($"  Gen 2 collections: {GC.CollectionCount(2)} (LOH is collected here)");
+        AnsiConsole.Write(heapTable);
+        AnsiConsole.WriteLine();
 
-        Console.WriteLine();
-        Console.WriteLine("── GC Settings ────────────────────────────────────────────────");
-        Console.WriteLine($"  LOH Compaction Mode:  {GCSettings.LargeObjectHeapCompactionMode}");
-        Console.WriteLine($"  Latency Mode:         {GCSettings.LatencyMode}");
-        Console.WriteLine($"  Is Server GC:         {GCSettings.IsServerGC}");
+        // Visual Bar Chart for heap sizes (if there's meaningful data)
+        long maxSize = 0;
+        for (int i = 0; i < genInfo.Length && i < genNames.Length; i++)
+        {
+            if (genInfo[i].SizeAfterBytes > maxSize)
+                maxSize = genInfo[i].SizeAfterBytes;
+        }
 
-        Console.WriteLine();
-        Console.WriteLine("── Process Memory (via Environment) ──────────────────────────");
-        Console.WriteLine($"  Working Set (64-bit): {FormatBytes(Environment.WorkingSet)}");
+        if (maxSize > 0)
+        {
+            var barChart = new BarChart()
+                .Label("[bold yellow]Heap Size Distribution[/]")
+                .CenterLabel()
+                .Width(60);
 
-        Console.WriteLine("═══════════════════════════════════════════════════════════════");
+            string[] barLabels = { "Gen 0", "Gen 1", "Gen 2", "LOH", "POH" };
+            Color[] barColors = { Color.Green, Color.Lime, Color.Yellow, Color.Red, Color.Blue };
+
+            for (int i = 0; i < genInfo.Length && i < barLabels.Length; i++)
+            {
+                double valueMB = genInfo[i].SizeAfterBytes / (1024.0 * 1024);
+                barChart.AddItem(barLabels[i], valueMB, barColors[i]);
+            }
+
+            AnsiConsole.Write(barChart);
+            AnsiConsole.WriteLine();
+        }
+
+        // GC Collection Counts & Settings in a Grid
+        var infoGrid = new Grid()
+            .AddColumn()
+            .AddColumn();
+
+        // GC Collections Panel
+        var collectionsTable = new Table()
+            .Border(TableBorder.Rounded)
+            .BorderColor(Color.Grey)
+            .Title("[bold yellow]GC Collections[/]")
+            .AddColumn("[grey]Generation[/]")
+            .AddColumn(new TableColumn("[grey]Count[/]").RightAligned());
+
+        collectionsTable.AddRow("Gen 0", $"[green]{GC.CollectionCount(0)}[/]");
+        collectionsTable.AddRow("Gen 1", $"[yellow]{GC.CollectionCount(1)}[/]");
+        collectionsTable.AddRow("Gen 2 [dim](incl. LOH)[/]", $"[red]{GC.CollectionCount(2)}[/]");
+
+        // GC Settings Panel
+        var settingsTable = new Table()
+            .Border(TableBorder.Rounded)
+            .BorderColor(Color.Grey)
+            .Title("[bold yellow]GC Settings[/]")
+            .AddColumn("[grey]Setting[/]")
+            .AddColumn("[grey]Value[/]");
+
+        settingsTable.AddRow("LOH Compaction", $"[cyan]{GCSettings.LargeObjectHeapCompactionMode}[/]");
+        settingsTable.AddRow("Latency Mode", $"[cyan]{GCSettings.LatencyMode}[/]");
+        settingsTable.AddRow("Server GC", GCSettings.IsServerGC ? "[green]Yes[/]" : "[grey]No[/]");
+
+        infoGrid.AddRow(collectionsTable, settingsTable);
+        AnsiConsole.Write(infoGrid);
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.Write(new Rule().RuleStyle("blue"));
     }
 
     static string FormatBytes(long bytes)
