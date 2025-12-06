@@ -3,9 +3,17 @@ namespace _03_LiskovSubstitutionPattern.Tests;
 // LSP Behavioral Rule: Subclasses must not throw exceptions
 // that are not expected by the base class contract.
 //
-// Here, SuperClass.Do() throws SuperException.
-// Consumer code (TestUseCase) catches SuperException.
-// SubClassBreak violates LSP by throwing AnotherException instead.
+// Class Hierarchy:                 Exception Hierarchy:
+// ----------------                 --------------------
+//    SuperClass                       Exception
+//    /        \                       /       \
+// SubClassOk  SubClassBreak    SuperException  AnotherException
+//                                    |
+//                               SubException
+//
+// SuperClass.Do()     -> throws SuperException   (contract)
+// SubClassOk.Do()     -> throws SubException     (ok, inherits from SuperException)
+// SubClassBreak.Do()  -> throws AnotherException (violates LSP!)
 
 [TestFixture]
 public class BehavioralTests
